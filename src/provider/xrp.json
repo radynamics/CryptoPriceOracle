@@ -1,0 +1,87 @@
+{
+    "symbol": "XRP",
+    "quotes": [
+        {
+            "symbol": "USD",
+            "sources": [
+                {
+                    "name": "bitstamp",
+                    "url": "https://www.bitstamp.net/api/v2/ticker/xrpusd/",
+                    "selector": "data.last",
+                    "invert": false
+                },
+                {
+                    "name": "kraken",
+                    "url": "https://api.kraken.com/0/public/Ticker?pair=XRPUSD",
+                    "selector": "data.result.XXRPZUSD.c[0]",
+                    "invert": false
+                },
+                {
+                    "name": "bitfinex",
+                    "url": "https://api-pub.bitfinex.com/v2/ticker/tXRPUSD",
+                    "selector": "data[6]",
+                    "invert": false
+                },
+                {
+                    "name": "btse",
+                    "url": "https://api.btse.com/spot/api/v3.2/price?symbol=XRP-USD",
+                    "selector": "data[0].lastPrice",
+                    "invert": false
+                },
+                {
+                    "name": "independent-reserve",
+                    "url": "https://api.independentreserve.com/Public/GetMarketSummary?primaryCurrencyCode=xrp&secondaryCurrencyCode=usd",
+                    "selector": "data.LastPrice",
+                    "invert": false
+                },
+                {
+                    "name": "bithash",
+                    "url": "https://www.bithash.net/api/v4/ticker",
+                    "selector": "data.XRP_USD.last_price",
+                    "invert": false
+                }
+            ]
+        },
+        {
+            "symbol": "EUR",
+            "sources": [
+                {
+                    "name": "bitstamp",
+                    "url": "https://www.bitstamp.net/api/v2/ticker/xrpeur/",
+                    "selector": "data.last",
+                    "invert": false
+                },
+                {
+                    "name": "binance",
+                    "url": "https://api.binance.com/api/v3/ticker/price?symbol=XRPEUR",
+                    "selector": "data.price",
+                    "invert": false
+                },
+                {
+                    "name": "kraken",
+                    "url": "https://api.kraken.com/0/public/Ticker?pair=XRPEUR",
+                    "selector": "data.result.XXRPZEUR.c[0]",
+                    "invert": false
+                },
+                {
+                    "name": "btse",
+                    "url": "https://api.btse.com/spot/api/v3.2/price?symbol=XRP-EUR",
+                    "selector": "data[0].lastPrice",
+                    "invert": false
+                },
+                {
+                    "name": "bithash",
+                    "url": "https://www.bithash.net/api/v4/ticker",
+                    "selector": "data.XRP_EUR.last_price",
+                    "invert": false
+                },
+                {
+                    "name": "coinfield",
+                    "url": "https://api.coinfield.com/v1/tickers/xrpeur",
+                    "selector": "data.tickers.xrpeur.last",
+                    "invert": false
+                }    
+            ]
+        }
+    ]
+}

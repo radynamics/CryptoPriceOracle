@@ -1,0 +1,28 @@
+{
+    "symbol": "BTC",
+    "quotes": [
+        {
+            "symbol": "USD",
+            "sources": [
+                {
+                    "name": "bitstamp",
+                    "url": "https://www.bitstamp.net/api/v2/ticker/btcusd/",
+                    "selector": "data.last",
+                    "invert": false
+                },
+                {
+                    "name": "kraken",
+                    "url": "https://api.kraken.com/0/public/Ticker?pair=BTCUSD",
+                    "selector": "data.result.XXBTZUSD.c[0]",
+                    "invert": false
+                },
+                {
+                    "name": "bitfinex",
+                    "url": "https://api-pub.bitfinex.com/v2/ticker/tBTCUSD",
+                    "selector": "data[6]",
+                    "invert": false
+                }
+            ]
+        }
+    ]
+}
