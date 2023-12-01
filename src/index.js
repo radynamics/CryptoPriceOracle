@@ -50,6 +50,9 @@ function getJsonFiles(dir, files = []) {
 
 async function doWork() {
     const result = await fetchSources()
+    if (result.length === 0) {
+        return
+    }
     for (const publisher of publishers) {
         publisher.publishAll(result)
     }
@@ -70,7 +73,9 @@ async function fetchSources() {
     var result = []
     for (const r of await Promise.allSettled(promises)) {
         if (r.status === 'fulfilled') {
-            result.push(r.value)
+            if (r.value !== undefined) {
+                result.push(r.value)
+            }
         }
     }
     return result
