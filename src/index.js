@@ -56,17 +56,21 @@ async function doWork() {
 }
 
 async function fetchSources() {
-    var result = []
+    var promises = []
     for (const p of provider) {
         const baseCcy = p.symbol
         for (const q of p.quotes) {
             const quoteCcy = q.symbol
             for (const s of q.sources) {
-                const fxRate = await fetchSource(baseCcy, quoteCcy, s)
-                if (fxRate !== undefined) {
-                    result.push(fxRate)
-                }
+                promises.push(fetchSource(baseCcy, quoteCcy, s))
             }
+        }
+    }
+
+    var result = []
+    for (const r of await Promise.allSettled(promises)) {
+        if (r.status === 'fulfilled') {
+            result.push(r.value)
         }
     }
     return result
