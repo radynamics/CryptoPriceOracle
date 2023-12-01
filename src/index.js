@@ -4,7 +4,8 @@ const fs = require('fs')
 const ExchangeRateSource = require('./exchangeratesource')
 const FxRate = require('./model/fxrate')
 const MemoryStore = require('./publisher/memorystore')
-require('dotenv')
+const XrplTrustlineStore = require('./publisher/xrpltrustlinestore')
+require('dotenv').config()
 const RateController = require('./controller/ratecontroller');
 const api = require('./apiauth');
 
@@ -13,7 +14,9 @@ const port = process.env.PORT || 3000
 const interval = process.env.PUBLISH_INTERVAL || 60000
 let provider = []
 const memoryStore = new MemoryStore()
-let publishers = [ memoryStore ]
+const xrplTrustlineStore = new XrplTrustlineStore(process.env.ENDPOINT, process.env.XRPL_ACCOUNT_PUBLICKEY, process.env.XRPL_ACCOUNT_SECRET, process.env.XRPL_ISSUER_PUBLICKEY);
+xrplTrustlineStore.setMaxFee(process.env.MAX_FEE_DROPS === undefined ? XrplTrustlineStore.DefaultMaxFee : parseInt(process.env.MAX_FEE_DROPS))
+let publishers = [memoryStore, xrplTrustlineStore]
 
 app.get('/', (req, res) => {
     res.send('Service up and running ☕')

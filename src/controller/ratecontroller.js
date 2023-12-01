@@ -25,11 +25,11 @@ class RateController {
             return
         }
         const closest = this.closest(result, at.toDate())
-        const avgRate = this.avgRate(result)
+        const avgRate = RateController.avgRate(result)
         JsonResponse.ok(res, { baseCcy: closest.closest, quoteCcy: closest.quoteCcy, rate: avgRate, sourcecount: result.length, at: closest.at })
     }
 
-    avgRate(list) {
+    static avgRate(list) {
         var sum = 0
         for (const fxRate of list) {
             sum += fxRate.rate
