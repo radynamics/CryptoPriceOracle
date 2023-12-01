@@ -1,5 +1,5 @@
 'use strict'
-const axios = require('axios/dist/node/axios.cjs')
+const axios = require('axios')
 axios.defaults.timeout = process.env.TIMEOUT_SECONDS === undefined ? 15000 : process.env.TIMEOUT_SECONDS * 1000
 require('dotenv')
 
