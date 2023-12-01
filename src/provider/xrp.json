@@ -74,12 +74,6 @@
                     "url": "https://www.bithash.net/api/v4/ticker",
                     "selector": "data.XRP_EUR.last_price",
                     "invert": false
-                },
-                {
-                    "name": "coinfield",
-                    "url": "https://api.coinfield.com/v1/tickers/xrpeur",
-                    "selector": "data.tickers.xrpeur.last",
-                    "invert": false
                 }    
             ]
         }
