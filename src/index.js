@@ -13,7 +13,7 @@ const port = process.env.PORT || 3000
 const interval = process.env.PUBLISH_INTERVAL || 60000
 let provider = []
 const memoryStore = new MemoryStore()
-let publishers = [memoryStore]
+let publishers = [ memoryStore ]
 
 app.get('/', (req, res) => {
     res.send('Service up and running ☕')
@@ -45,33 +45,37 @@ function getJsonFiles(dir, files = []) {
     return files
 }
 
+async function doWork() {
+    const result = await fetchSources()
+    for (const publisher of publishers) {
+        publisher.publishAll(result)
+    }
+}
+
 async function fetchSources() {
+    var result = []
     for (const p of provider) {
         const baseCcy = p.symbol
         for (const q of p.quotes) {
             const quoteCcy = q.symbol
             for (const s of q.sources) {
-                fetchSource(baseCcy, quoteCcy, s)
+                const fxRate = await fetchSource(baseCcy, quoteCcy, s)
+                if (fxRate !== undefined) {
+                    result.push(fxRate)
+                }
             }
         }
     }
+    return result
 }
 async function fetchSource(baseCcy, quoteCcy, source) {
     const s = new ExchangeRateSource({ base: baseCcy, quote: quoteCcy }, source)
     try {
         const rate = await s.get()
-        if (rate === undefined) {
-            return
-        }
-        publish(new FxRate(baseCcy, quoteCcy, rate, source.name))
+        return rate === undefined ? undefined : new FxRate(baseCcy, quoteCcy, rate, source.name)
     } catch (e) {
         console.error(`Failed getting ${source.url}`)
         console.error(e)
-    }
-}
-function publish(rxRate) {
-    for (const publisher of publishers) {
-        publisher.publish(rxRate)
     }
 }
 
@@ -80,7 +84,7 @@ app.listen(port, () => {
     loadProvider()
 
     setInterval(function () {
-        fetchSources()
+        doWork()
     }, interval)
-    fetchSources()
+    doWork()
 })

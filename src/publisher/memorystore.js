@@ -5,6 +5,11 @@ class MemoryStore {
         this.rates = new Map()
     }
 
+    publishAll(rates) {
+        for (const fxRate of rates) {
+            this.publish(fxRate)
+        }
+    }
     publish(rate) {
         if (!this.exists(rate.baseCcy)) {
             this.rates.set(rate.baseCcy, [])
