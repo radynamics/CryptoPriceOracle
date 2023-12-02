@@ -1,15 +1,19 @@
 'use strict'
+const moment = require('moment');
 
 class MemoryStore {
+    static DefaultMaxAgeSeconds = 3600
     constructor() {
         this.rates = new Map()
         this.lastPublished = null
+        this.maxAgeSeconds = MemoryStore.DefaultMaxAgeSeconds
     }
 
     publishAll(rates) {
         for (const fxRate of rates) {
             this.publish(fxRate)
         }
+        this.removeOutdated()
     }
     publish(rate) {
         if (!this.exists(rate.baseCcy)) {
@@ -17,6 +21,13 @@ class MemoryStore {
         }
         this.rates.get(rate.baseCcy).push(rate)
         this.lastPublished = new Date()
+    }
+
+    removeOutdated() {
+        var before = moment().subtract(this.maxAgeSeconds, 'seconds').toDate()
+        for (let [baseCcy, value] of this.rates) {
+            this.rates.set(baseCcy, this.rates.get(baseCcy).filter((o) => o.at >= before))
+        }
     }
 
     exists(baseCcy) {
@@ -36,6 +47,10 @@ class MemoryStore {
             count += r[1].length
         }
         return count
+    }
+
+    setMaxAgeSeconds(value) {
+        this.maxAgeSeconds = value
     }
 
     getName() {
