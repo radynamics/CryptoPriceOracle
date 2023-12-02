@@ -9,7 +9,7 @@ class RateController {
         this.store = store
     }
 
-    getRate(req, res) {
+    async getRate(req, res) {
         const baseCcy = req.params.id
         if (req.query.quote === undefined) {
             JsonResponse.errorParamMissing(res, 'quote')
@@ -20,7 +20,7 @@ class RateController {
         const start = moment(at).subtract(1, 'minutes').toDate();
         const end = moment(at).add(1, 'minutes').toDate();
 
-        const result = this.store.list(baseCcy, quoteCcy, start, end)
+        const result = await this.store.list(baseCcy, quoteCcy, start, end)
         if (result.length === 0) {
             JsonResponse.ok(res, null)
             return

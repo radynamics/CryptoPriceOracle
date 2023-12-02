@@ -9,6 +9,7 @@ require('dotenv').config()
 const RateController = require('./controller/ratecontroller');
 const api = require('./apiauth');
 const JsonResponse = require('./jsonresponse');
+const MariaDbStore = require('./publisher/mariadbstore')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -22,13 +23,15 @@ const memoryStore = new MemoryStore()
 memoryStore.setMaxAgeSeconds(process.env.MEMORYSTORE_MAXAGE_SECONDS === undefined ? MemoryStore.DefaultMaxAgeSeconds : parseInt(process.env.MEMORYSTORE_MAXAGE_SECONDS))
 const xrplTrustlineStore = new XrplTrustlineStore(process.env.ENDPOINT, process.env.XRPL_ACCOUNT_PUBLICKEY, process.env.XRPL_ACCOUNT_SECRET, process.env.XRPL_ISSUER_PUBLICKEY);
 xrplTrustlineStore.setMaxFee(process.env.MAX_FEE_DROPS === undefined ? XrplTrustlineStore.DefaultMaxFee : parseInt(process.env.MAX_FEE_DROPS))
-let publishers = [memoryStore, xrplTrustlineStore]
+let mariaDbStore = new MariaDbStore(process.env.DB_HOST, process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD)
+mariaDbStore.setMaxAgeSeconds(process.env.MARIADBSTORE_MAXAGE_SECONDS === undefined ? MariaDbStore.DefaultMaxAgeSeconds : parseInt(process.env.MARIADBSTORE_MAXAGE_SECONDS))
+let publishers = [mariaDbStore, xrplTrustlineStore]
 
 app.get('/', (req, res) => {
     res.send('Service up and running ☕')
 })
 
-const rateController = new RateController(memoryStore)
+const rateController = new RateController(mariaDbStore)
 const router = express.Router();
 app.get('/rate/:id', api.auth, (req, res) => { rateController.getRate(req, res) });
 app.get('/health', getHealth)
@@ -54,6 +57,11 @@ function getJsonFiles(dir, files = []) {
         }
     }
     return files
+}
+async function initDb() {
+    if (!await mariaDbStore.anyTablePresent()) {
+        await mariaDbStore.initDb()
+    }
 }
 
 async function doWork() {
@@ -131,9 +139,10 @@ function verifyPwr(req, res) {
     return true
 }
 
-app.listen(port, () => {
+app.listen(port, async () => {
     console.log(`Started, listening on port ${port}`)
     loadProvider()
+    await initDb()
 
     setInterval(function () {
         doWork()
