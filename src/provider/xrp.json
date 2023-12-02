@@ -177,6 +177,12 @@
                     "url": "https://api.bitkub.com/api/market/ticker?sym=THB_XRP",
                     "selector": "data.THB_XRP.last",
                     "invert": false
+                },
+                {
+                    "name": "coingecko",
+                    "url": "https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=thb&precision=6",
+                    "selector": "data.ripple.thb",
+                    "invert": false
                 }
             ]
         },
@@ -250,6 +256,12 @@
                     "name": "bitso:mxn",
                     "url": "https://api.bitso.com/v3/ticker/?book=xrp_mxn",
                     "selector": "data.payload.last",
+                    "invert": false
+                },
+                {
+                    "name": "coingecko",
+                    "url": "https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=MXN&precision=6",
+                    "selector": "data.ripple.mxn",
                     "invert": false
                 }
             ]
