@@ -2,6 +2,7 @@
 const FxRate = require('../model/fxrate');
 const moment = require('moment');
 const JsonResponse = require('../jsonresponse');
+const Utils = require('../utils')
 
 class RateController {
     constructor(store) {
@@ -25,7 +26,7 @@ class RateController {
             return
         }
         const closest = this.closest(result, at.toDate())
-        const avgRate = RateController.avgRate(result)
+        const avgRate = Utils.round(RateController.avgRate(result), 6)
         JsonResponse.ok(res, { baseCcy: closest.closest, quoteCcy: closest.quoteCcy, rate: avgRate, sourcecount: result.length, at: closest.at })
     }
 

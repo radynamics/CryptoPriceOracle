@@ -58,12 +58,12 @@ class XrplTrustlineStore {
     }
 
     createXrplTransaction(ccy, rates) {
-        const limit = Utils.round(RateController.avgRate(rates), 14)
+        const limit = Utils.round(RateController.avgRate(rates), 6)
         var memos = []
         for (const rate of rates) {
             memos.push({
                 Memo: {
-                    MemoData: Utils.utf8ToHex(rate.rate.toString()),
+                    MemoData: Utils.utf8ToHex(Utils.round(rate.rate, 6).toString()),
                     MemoFormat: Utils.utf8ToHex("text/csv"),
                     MemoType: Utils.utf8ToHex(`rates:${rate.exchangeName}:${rate.quoteCcy.toLowerCase()}`)
                 }
