@@ -8,11 +8,15 @@ const XrplTrustlineStore = require('./publisher/xrpltrustlinestore')
 require('dotenv').config()
 const RateController = require('./controller/ratecontroller');
 const api = require('./apiauth');
+const JsonResponse = require('./jsonresponse');
 
 const app = express()
 const port = process.env.PORT || 3000
 const interval = process.env.PUBLISH_INTERVAL || 60000
 const unhealthyAfter = process.env.UNHEALTHY_AFTER === undefined ? 900000 : parseInt(process.env.UNHEALTHY_AFTER);
+const adminPwr = process.env.ADMINPWR
+if (adminPwr == null) throw new Error('env.ADMINPWR must be defined')
+const started = new Date()
 let provider = []
 const memoryStore = new MemoryStore()
 const xrplTrustlineStore = new XrplTrustlineStore(process.env.ENDPOINT, process.env.XRPL_ACCOUNT_PUBLICKEY, process.env.XRPL_ACCOUNT_SECRET, process.env.XRPL_ISSUER_PUBLICKEY);
@@ -27,6 +31,7 @@ const rateController = new RateController(memoryStore)
 const router = express.Router();
 app.get('/rate/:id', api.auth, (req, res) => { rateController.getRate(req, res) });
 app.get('/health', getHealth)
+app.get('/status', getStatus)
 app.use('/', router)
 
 function loadProvider() {
@@ -107,6 +112,22 @@ async function getHealth(req, res) {
     } else {
         res.status(200).send(null)
     }
+}
+async function getStatus(req, res) {
+    if (!verifyPwr(req, res)) return
+    var stats = []
+    for (const publisher of publishers) {
+        stats.push({ name: publisher.getName(), status: await publisher.getStatus() })
+    }
+
+    JsonResponse.ok(res, { started: started.toISOString(), provider: stats })
+}
+function verifyPwr(req, res) {
+    if (req.query.pwr !== adminPwr) {
+        JsonResponse.error(res, 'invalid password')
+        return false
+    }
+    return true
 }
 
 app.listen(port, () => {

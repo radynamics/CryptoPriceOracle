@@ -14,6 +14,10 @@ class XrplTrustlineStore {
         this.rates = new Map()
         this.maxFee = XrplTrustlineStore.DefaultMaxFee
         this.lastPublished = null
+        this.lastFee = null
+        this.submissionsSinceStart = 0
+        this.lastError = null
+        this.lastErrorOccured = null
     }
 
     publishAll(rates) {
@@ -87,6 +91,7 @@ class XrplTrustlineStore {
         try {
             const accountWallet = xrpl.Wallet.fromSeed(this.accountSecret)
             const prepared = await client.autofill(tx)
+            this.lastFee = new Number(prepared.Fee)
             if (new Number(prepared.Fee) > this.maxFee) {
                 console.warn(`Submitting ${tx.LimitAmount.currency} failed. Fee ${prepared.Fee} is over max ${this.maxFee}.`)
                 return
@@ -97,19 +102,22 @@ class XrplTrustlineStore {
                     // terQUEUED: "... did not meet the open ledger requirement, so the transaction has been queued for a future ledger."
                     var successResult = ['tesSUCCESS', 'terQUEUED']
                     if (!successResult.includes(result.result.engine_result)) {
+                        this.lastError = result.result.engine_result
+                        this.lastErrorOccured = new Date()
                         console.warn(`Submitting ${tx.LimitAmount.currency} failed. ${result.result.engine_result}`)
                         return
                     }
                     console.info(`Published ${tx.LimitAmount.currency} to XRPL`)
                     this.lastPublished = new Date()
+                    this.submissionsSinceStart++
                 })
                 .catch(e => {
                     console.error(tx)
-                    console.error(e)
+                    this.logError(e)
                 })
         } catch (e) {
             console.error(tx)
-            console.error(e)
+            this.logError(e)
         }
     }
 
@@ -160,6 +168,12 @@ class XrplTrustlineStore {
         return count
     }
 
+    logError(e) {
+        this.lastError = e.message
+        this.lastErrorOccured = new Date()
+        console.error(e)
+    }
+
     setMaxFee(value) {
         this.maxFee = value
     }
@@ -170,6 +184,34 @@ class XrplTrustlineStore {
 
     getLastPublished() {
         return this.lastPublished
+    }
+
+    async getStatus() {
+        return {
+            lastPublished: this.getLastPublished(),
+            queueSize: this.queueSize(),
+            lastFee: this.lastFee,
+            submissionsSinceStart: this.submissionsSinceStart,
+            accountBalance: await this.getAccountBalance(),
+            lastError: this.lastError,
+            lastErrorOccured: this.lastErrorOccured
+        }
+    }
+    async getAccountBalance() {
+        try {
+            const client = new xrpl.Client(this.endpoint)
+            await client.connect()
+            const response = await client.request({
+                command: 'account_info',
+                account: this.accountPublicKey,
+                ledger_index: "validated"
+            })
+            await client.disconnect()
+            return response.result.account_data.Balance
+        } catch (e) {
+            this.logError(e)
+            return null
+        }
     }
 }
 

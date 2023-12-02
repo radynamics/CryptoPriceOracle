@@ -45,6 +45,10 @@ class MemoryStore {
     getLastPublished() {
         return this.lastPublished
     }
+
+    async getStatus() {
+        return { lastPublished: this.getLastPublished(), size: this.size() }
+    }
 }
 
 module.exports = MemoryStore
