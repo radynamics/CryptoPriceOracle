@@ -3,6 +3,7 @@
 class MemoryStore {
     constructor() {
         this.rates = new Map()
+        this.lastPublished = null
     }
 
     publishAll(rates) {
@@ -15,6 +16,7 @@ class MemoryStore {
             this.rates.set(rate.baseCcy, [])
         }
         this.rates.get(rate.baseCcy).push(rate)
+        this.lastPublished = new Date()
     }
 
     exists(baseCcy) {
@@ -34,6 +36,14 @@ class MemoryStore {
             count += r[1].length
         }
         return count
+    }
+
+    getName() {
+        return "MemoryStore"
+    }
+
+    getLastPublished() {
+        return this.lastPublished
     }
 }
 

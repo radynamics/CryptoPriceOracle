@@ -12,6 +12,7 @@ const api = require('./apiauth');
 const app = express()
 const port = process.env.PORT || 3000
 const interval = process.env.PUBLISH_INTERVAL || 60000
+const unhealthyAfter = process.env.UNHEALTHY_AFTER === undefined ? 900000 : parseInt(process.env.UNHEALTHY_AFTER);
 let provider = []
 const memoryStore = new MemoryStore()
 const xrplTrustlineStore = new XrplTrustlineStore(process.env.ENDPOINT, process.env.XRPL_ACCOUNT_PUBLICKEY, process.env.XRPL_ACCOUNT_SECRET, process.env.XRPL_ISSUER_PUBLICKEY);
@@ -25,6 +26,7 @@ app.get('/', (req, res) => {
 const rateController = new RateController(memoryStore)
 const router = express.Router();
 app.get('/rate/:id', api.auth, (req, res) => { rateController.getRate(req, res) });
+app.get('/health', getHealth)
 app.use('/', router)
 
 function loadProvider() {
@@ -88,6 +90,22 @@ async function fetchSource(baseCcy, quoteCcy, source) {
     } catch (e) {
         console.error(`Failed getting ${source.url}`)
         console.error(e)
+    }
+}
+
+async function getHealth(req, res) {
+    var stats = []
+    for (const publisher of publishers) {
+        const lastPublished = publisher.getLastPublished()
+        const healthy = lastPublished == null || lastPublished.getTime() + unhealthyAfter > new Date().getTime()
+        const lastPublishedText = lastPublished == null ? null : lastPublished.toISOString()
+        stats.push({ name: publisher.getName(), healthy: healthy, lastPublished: lastPublishedText })
+    }
+
+    if (stats.filter(e => !e.healthy).length > 0) {
+        res.status(500).send(stats)
+    } else {
+        res.status(200).send(null)
     }
 }
 

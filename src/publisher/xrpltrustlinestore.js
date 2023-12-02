@@ -13,6 +13,7 @@ class XrplTrustlineStore {
         this.issuerPublicKey = issuerPublicKey
         this.rates = new Map()
         this.maxFee = XrplTrustlineStore.DefaultMaxFee
+        this.lastPublished = null
     }
 
     publishAll(rates) {
@@ -100,6 +101,7 @@ class XrplTrustlineStore {
                         return
                     }
                     console.info(`Published ${tx.LimitAmount.currency} to XRPL`)
+                    this.lastPublished = new Date()
                 })
                 .catch(e => {
                     console.error(tx)
@@ -160,6 +162,14 @@ class XrplTrustlineStore {
 
     setMaxFee(value) {
         this.maxFee = value
+    }
+
+    getName() {
+        return "XrplTrustlineStore"
+    }
+
+    getLastPublished() {
+        return this.lastPublished
     }
 }
 
