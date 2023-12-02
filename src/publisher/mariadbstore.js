@@ -77,7 +77,8 @@ class MariaDbStore {
         let conn
         try {
             conn = await this.pool.getConnection()
-            return await conn.query("SELECT COUNT(1) FROM rate")
+            const res = await conn.query("SELECT COUNT(1) AS Cnt FROM rate")
+            return res[0].Cnt
         } catch (err) {
             throw err
         } finally {
@@ -98,7 +99,7 @@ class MariaDbStore {
     }
 
     async getStatus() {
-        return { lastPublished: this.getLastPublished(), size: this.size() }
+        return { lastPublished: this.getLastPublished(), size: new String(await this.size()) }
     }
 
     toDateTimeText(value) {
