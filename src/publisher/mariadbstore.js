@@ -3,13 +3,14 @@ const moment = require('moment')
 const mariadb = require('mariadb')
 const FxRate = require('../model/fxrate');
 const ExchangeIdHelper = require('../model/exchangeidhelper');
+const Utils = require('../utils')
 
 class MariaDbStore {
     static DefaultMaxAgeSeconds = 60 * 60 * 24 * 60
-    constructor(host, dbName, user, password) {
+    constructor(dbInfo) {
         this.lastPublished = null
         this.maxAgeSeconds = MariaDbStore.DefaultMaxAgeSeconds
-        this.pool = mariadb.createPool({ host: host, database: dbName, user: user, password: password, connectionLimit: 5 })
+        this.pool = mariadb.createPool({ host: dbInfo.host, database: dbInfo.dbName, user: dbInfo.user, password: dbInfo.password, connectionLimit: 5 })
     }
 
     publishAll(rates) {
@@ -22,7 +23,7 @@ class MariaDbStore {
         let conn
         try {
             conn = await this.pool.getConnection()
-            let atText = this.toDateTimeText(rate.at)
+            let atText = Utils.toMariaDbDateTimeText(rate.at)
             const exchangeId = ExchangeIdHelper.toId(rate.exchangeName)
             if (exchangeId === ExchangeIdHelper.unknown) {
                 console.warn(`Exchange ${rate.exchangeName} is unknown.`)
@@ -44,7 +45,7 @@ class MariaDbStore {
         let conn
         try {
             conn = await this.pool.getConnection()
-            let beforeText = this.toDateTimeText(before)
+            let beforeText = Utils.toMariaDbDateTimeText(before)
             await conn.query("DELETE FROM rate WHERE Dt < ?", [beforeText])
         } catch (err) {
             throw err
@@ -57,8 +58,8 @@ class MariaDbStore {
         let conn
         try {
             conn = await this.pool.getConnection()
-            let startText = this.toDateTimeText(start)
-            let endText = this.toDateTimeText(end)
+            let startText = Utils.toMariaDbDateTimeText(start)
+            let endText = Utils.toMariaDbDateTimeText(end)
             const res = await conn.query("SELECT * FROM rate WHERE BaseCcy = ? AND QuoteCcy = ? AND Dt BETWEEN ? AND ?", [baseCcy, quoteCcy, startText, endText])
             return this.toFxRateList(res)
         } catch (err) {
@@ -107,10 +108,6 @@ class MariaDbStore {
         return { lastPublished: this.getLastPublished(), size: new String(await this.size()) }
     }
 
-    toDateTimeText(value) {
-        // Enforce format 'YYYY-MM-DD HH:MM:SS'
-        return new Date(value.toISOString()).toJSON().slice(0, 19).replace('T', ' ')
-    }
     async anyTablePresent() {
         let conn
         try {
@@ -137,6 +134,16 @@ class MariaDbStore {
                     "`Dt` DATETIME NOT NULL," +
                     "PRIMARY KEY (`RateId`)," +
                     "INDEX `IX_BASE_QUOTE_DT` (`BaseCcy` ASC, `QuoteCcy` ASC, `Dt` ASC) VISIBLE)"
+                await conn.query(sql)
+            }
+            {
+                const sql = "CREATE TABLE `apikey` (" +
+                    "`ApiKeyId` INT NOT NULL AUTO_INCREMENT," +
+                    "`ApiKey` VARCHAR(32) NOT NULL," +
+                    "`ConsumerName` VARCHAR(64) NOT NULL," +
+                    "`ValidUntil` DATETIME NOT NULL," +
+                    "PRIMARY KEY (`ApiKeyId`)," +
+                    "UNIQUE KEY `ApiKey_UNIQUE` (`ApiKey`))"
                 await conn.query(sql)
             }
         } catch (err) {

@@ -1,5 +1,6 @@
 'use strict'
 const express = require('express')
+const bodyParser = require('body-parser')
 const fs = require('fs')
 const ExchangeRateSource = require('./exchangeratesource')
 const FxRate = require('./model/fxrate')
@@ -7,16 +8,20 @@ const MemoryStore = require('./publisher/memorystore')
 const XrplTrustlineStore = require('./publisher/xrpltrustlinestore')
 require('dotenv').config()
 const RateController = require('./controller/ratecontroller');
-const api = require('./apiauth');
+const ApiKeyController = require('./controller/apikeycontroller');
 const JsonResponse = require('./jsonresponse');
 const MariaDbStore = require('./publisher/mariadbstore')
 
 const app = express()
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
+
 const port = process.env.PORT || 3000
 const interval = process.env.PUBLISH_INTERVAL || 60000
 const unhealthyAfter = process.env.UNHEALTHY_AFTER === undefined ? 900000 : parseInt(process.env.UNHEALTHY_AFTER);
 const adminPwr = process.env.ADMINPWR
 if (adminPwr == null) throw new Error('env.ADMINPWR must be defined')
+const dbInfo = { host: process.env.DB_HOST, dbName: process.env.DB_NAME, user: process.env.DB_USER, password: process.env.DB_PASSWORD }
 
 if (process.env.LOG_INFO !== 'true') {
     console.info = function () { };
@@ -29,7 +34,7 @@ const memoryStore = new MemoryStore()
 memoryStore.setMaxAgeSeconds(process.env.MEMORYSTORE_MAXAGE_SECONDS === undefined ? MemoryStore.DefaultMaxAgeSeconds : parseInt(process.env.MEMORYSTORE_MAXAGE_SECONDS))
 const xrplTrustlineStore = new XrplTrustlineStore(process.env.ENDPOINT, process.env.XRPL_ACCOUNT_PUBLICKEY, process.env.XRPL_ACCOUNT_SECRET, process.env.XRPL_ISSUER_PUBLICKEY);
 xrplTrustlineStore.setMaxFee(process.env.MAX_FEE_DROPS === undefined ? XrplTrustlineStore.DefaultMaxFee : parseInt(process.env.MAX_FEE_DROPS))
-let mariaDbStore = new MariaDbStore(process.env.DB_HOST, process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD)
+let mariaDbStore = new MariaDbStore(dbInfo)
 mariaDbStore.setMaxAgeSeconds(process.env.MARIADBSTORE_MAXAGE_SECONDS === undefined ? MariaDbStore.DefaultMaxAgeSeconds : parseInt(process.env.MARIADBSTORE_MAXAGE_SECONDS))
 let publishers = [mariaDbStore, xrplTrustlineStore]
 
@@ -37,9 +42,12 @@ app.get('/', (req, res) => {
     res.send('Service up and running ☕')
 })
 
+const apiKeyController = new ApiKeyController(dbInfo)
 const rateController = new RateController(mariaDbStore)
 const router = express.Router();
-app.get('/rate/:id', api.auth, (req, res) => { rateController.getRate(req, res) });
+app.get('/rate/:id', apiKeyController.auth, (req, res) => { rateController.getRate(req, res) });
+app.get('/apikey', (req, res) => { verifyPwr(req, res) ? apiKeyController.list(req, res) : {} });
+app.post('/apikey', (req, res) => { verifyPwr(req, res) ? apiKeyController.create(req, res) : {} });
 app.get('/health', getHealth)
 app.get('/status', getStatus)
 app.use('/', router)
