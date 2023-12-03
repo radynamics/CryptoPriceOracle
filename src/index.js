@@ -22,6 +22,7 @@ const unhealthyAfter = process.env.UNHEALTHY_AFTER === undefined ? 900000 : pars
 const adminPwr = process.env.ADMINPWR
 if (adminPwr == null) throw new Error('env.ADMINPWR must be defined')
 const dbInfo = { host: process.env.DB_HOST, dbName: process.env.DB_NAME, user: process.env.DB_USER, password: process.env.DB_PASSWORD }
+const fetchCcys = process.env.FETCH_CURRENCIES === undefined ? [] : process.env.FETCH_CURRENCIES.split(',')
 
 if (process.env.LOG_INFO !== 'true') {
     console.info = function () { };
@@ -55,9 +56,12 @@ app.use('/', router)
 function loadProvider() {
     let files = getJsonFiles('./provider')
     for (const file of files) {
-        const data = fs.readFileSync(file);
-        provider.push(JSON.parse(data.toString()))
-        console.info(`${file} loaded`)
+        const data = fs.readFileSync(file)
+        const content = JSON.parse(data.toString())
+        if (fetchCcys.length === 0 || fetchCcys.includes(content.symbol)) {
+            provider.push(content)
+            console.info(`${file} loaded`)
+        }
     }
 }
 function getJsonFiles(dir, files = []) {
