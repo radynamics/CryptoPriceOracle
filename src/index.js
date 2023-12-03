@@ -17,7 +17,13 @@ const interval = process.env.PUBLISH_INTERVAL || 60000
 const unhealthyAfter = process.env.UNHEALTHY_AFTER === undefined ? 900000 : parseInt(process.env.UNHEALTHY_AFTER);
 const adminPwr = process.env.ADMINPWR
 if (adminPwr == null) throw new Error('env.ADMINPWR must be defined')
+
+if (process.env.LOG_INFO !== 'true') {
+    console.info = function () { };
+}
+
 const started = new Date()
+
 let provider = []
 const memoryStore = new MemoryStore()
 memoryStore.setMaxAgeSeconds(process.env.MEMORYSTORE_MAXAGE_SECONDS === undefined ? MemoryStore.DefaultMaxAgeSeconds : parseInt(process.env.MEMORYSTORE_MAXAGE_SECONDS))
