@@ -1,0 +1,16 @@
+{
+    "symbol": "XAH",
+    "quotes": [
+        {
+            "symbol": "USD",
+            "sources": [
+                {
+                    "name": "bitrue",
+                    "url": "https://www.bitrue.com/api/v1/ticker/bookTicker?symbol=XAHUSDT",
+                    "selector": "data.askPrice",
+                    "invert": false
+                }
+            ]
+        }
+    ]
+}

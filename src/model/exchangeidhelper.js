@@ -28,6 +28,7 @@ class ExchangeIdHelper {
         [22, 'indodax'],
         [23, 'tokenize-exchange'],
         [24, 'bitfinex'],
+        [25, 'bitrue'],
     ]);
 
     static toId(text) {
