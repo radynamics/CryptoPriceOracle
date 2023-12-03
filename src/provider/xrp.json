@@ -253,7 +253,7 @@
             "symbol": "MXN",
             "sources": [
                 {
-                    "name": "bitso:mxn",
+                    "name": "bitso",
                     "url": "https://api.bitso.com/v3/ticker/?book=xrp_mxn",
                     "selector": "data.payload.last",
                     "invert": false
