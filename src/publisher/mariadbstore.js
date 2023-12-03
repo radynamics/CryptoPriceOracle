@@ -2,6 +2,7 @@
 const moment = require('moment')
 const mariadb = require('mariadb')
 const FxRate = require('../model/fxrate');
+const ExchangeIdHelper = require('../model/exchangeidhelper');
 
 class MariaDbStore {
     static DefaultMaxAgeSeconds = 60 * 60 * 24 * 60
@@ -22,7 +23,11 @@ class MariaDbStore {
         try {
             conn = await this.pool.getConnection()
             let atText = this.toDateTimeText(rate.at)
-            const res = await conn.query("INSERT INTO rate (BaseCcy, QuoteCcy, Rate, ExchangeName, Dt) VALUES (?, ?, ?, ?, ?)", [rate.baseCcy, rate.quoteCcy, rate.rate, rate.exchangeName, atText])
+            const exchangeId = ExchangeIdHelper.toId(rate.exchangeName)
+            if (exchangeId === ExchangeIdHelper.unknown) {
+                console.warn(`Exchange ${rate.exchangeName} is unknown.`)
+            }
+            const res = await conn.query("INSERT INTO rate (BaseCcy, QuoteCcy, Rate, ExchangeId, Dt) VALUES (?, ?, ?, ?, ?)", [rate.baseCcy, rate.quoteCcy, rate.rate, exchangeId, atText])
             if (res.affectedRows !== 1) {
                 throw new Error(`Inserting rate failed. ${JSON.stringify(rate)}`)
             }
@@ -128,7 +133,7 @@ class MariaDbStore {
                     "`BaseCcy` VARCHAR(10) NOT NULL," +
                     "`QuoteCcy` VARCHAR(10) NOT NULL," +
                     "`Rate` DOUBLE NOT NULL," +
-                    "`ExchangeName` VARCHAR(32) NOT NULL," +
+                    "`ExchangeId` INT NOT NULL," +
                     "`Dt` DATETIME NOT NULL," +
                     "PRIMARY KEY (`RateId`)," +
                     "INDEX `IX_BASE_QUOTE_DT` (`BaseCcy` ASC, `QuoteCcy` ASC, `Dt` ASC) VISIBLE)"
