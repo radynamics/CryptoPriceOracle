@@ -2,18 +2,21 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const fs = require('fs')
+require('dotenv').config()
+const moment = require('moment')
+
 const ExchangeRateSource = require('./exchangeratesource')
 const FxRate = require('./model/fxrate')
-const MemoryPublisher = require('./publisher/memorypublisher')
-const XrplTrustlinePublisher = require('./publisher/xrpltrustlinepublisher')
-require('dotenv').config()
-const RateController = require('./controller/ratecontroller');
-const ApiKeyController = require('./controller/apikeycontroller');
 const JsonResponse = require('./jsonresponse');
-const MariaDbPublisher = require('./publisher/mariadbpublisher')
+
 const MariaDbApiKeyStore = require('./store/mariadbapikeystore')
 const MemoryApiKeyStore = require('./store/memoryapikeystore')
-const moment = require('moment')
+const MariaDbPublisher = require('./publisher/mariadbpublisher')
+const MemoryPublisher = require('./publisher/memorypublisher')
+const XrplTrustlinePublisher = require('./publisher/xrpltrustlinepublisher')
+
+const RateController = require('./controller/ratecontroller');
+const ApiKeyController = require('./controller/apikeycontroller');
 
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
