@@ -37,9 +37,11 @@ const memoryStore = new MemoryStore()
 memoryStore.setMaxAgeSeconds(process.env.MEMORYSTORE_MAXAGE_SECONDS === undefined ? MemoryStore.DefaultMaxAgeSeconds : parseInt(process.env.MEMORYSTORE_MAXAGE_SECONDS))
 publishers.push(memoryStore)
 
-if (process.env.XRPL_PUBLISHER_ENABLED === 'true') {
+const publishCurrencies = process.env.XRPL_PUBLISH_CURRENCIES === undefined ? [] : process.env.XRPL_PUBLISH_CURRENCIES.split(',')
+if (publishCurrencies.length > 0) {
     const xrplTrustlineStore = new XrplTrustlineStore(process.env.XRPL_ENDPOINT, process.env.XRPL_ACCOUNT_PUBLICKEY, process.env.XRPL_ACCOUNT_SECRET, process.env.XRPL_ISSUER_PUBLICKEY);
     xrplTrustlineStore.setMaxFee(process.env.XRPL_MAX_FEE_DROPS === undefined ? XrplTrustlineStore.DefaultMaxFee : parseInt(process.env.XRPL_MAX_FEE_DROPS))
+    xrplTrustlineStore.setPublishCurrencies(new Set(publishCurrencies))
     publishers.push(xrplTrustlineStore)
 
 }

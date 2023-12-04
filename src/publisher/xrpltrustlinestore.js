@@ -18,13 +18,14 @@ class XrplTrustlineStore {
         this.submissionsSinceStart = 0
         this.lastError = null
         this.lastErrorOccured = null
+        this.publishCurrencies = new Set()
     }
 
     publishAll(rates) {
         // Ensure all rates at the same time get processed together.
         const key = this.createKey(new Date())
         for (const rate of rates) {
-            if (new Set(['XRP', 'XAH']).has(rate.baseCcy)) {
+            if (this.publishCurrencies.has(rate.baseCcy)) {
                 this.queue(key, rate)
             }
         }
@@ -176,6 +177,9 @@ class XrplTrustlineStore {
 
     setMaxFee(value) {
         this.maxFee = value
+    }
+    setPublishCurrencies(value) {
+        this.publishCurrencies = value
     }
 
     getName() {
