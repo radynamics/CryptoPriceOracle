@@ -35,7 +35,7 @@ class ApiKeyController {
         if (apiKey === undefined || apiKey.length === 0) {
             return false
         }
-        return (await this.store.get(apiKey)).length > 0
+        return (await this.store.get(apiKey)) !== null
     }
 }
 

@@ -45,8 +45,8 @@ class MariaDbApiKeyStore {
         let conn
         try {
             conn = await this.pool.getConnection()
-            const res = await conn.query("SELECT 1 FROM apikey WHERE ApiKey = ?", [apiKey])
-            return res
+            const res = await conn.query("SELECT * FROM apikey WHERE ApiKey = ?", [apiKey])
+            return res.length === 0 ? null : this.toList(res)[0]
         } catch (err) {
             throw err
         } finally {
