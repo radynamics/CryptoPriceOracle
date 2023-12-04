@@ -32,13 +32,21 @@ if (process.env.LOG_INFO !== 'true') {
 const started = new Date()
 
 let provider = []
+let publishers = []
 const memoryStore = new MemoryStore()
 memoryStore.setMaxAgeSeconds(process.env.MEMORYSTORE_MAXAGE_SECONDS === undefined ? MemoryStore.DefaultMaxAgeSeconds : parseInt(process.env.MEMORYSTORE_MAXAGE_SECONDS))
-const xrplTrustlineStore = new XrplTrustlineStore(process.env.XRPL_ENDPOINT, process.env.XRPL_ACCOUNT_PUBLICKEY, process.env.XRPL_ACCOUNT_SECRET, process.env.XRPL_ISSUER_PUBLICKEY);
-xrplTrustlineStore.setMaxFee(process.env.XRPL_MAX_FEE_DROPS === undefined ? XrplTrustlineStore.DefaultMaxFee : parseInt(process.env.XRPL_MAX_FEE_DROPS))
-let mariaDbStore = new MariaDbStore(dbInfo)
+publishers.push(memoryStore)
+
+if (process.env.XRPL_PUBLISHER_ENABLED === 'true') {
+    const xrplTrustlineStore = new XrplTrustlineStore(process.env.XRPL_ENDPOINT, process.env.XRPL_ACCOUNT_PUBLICKEY, process.env.XRPL_ACCOUNT_SECRET, process.env.XRPL_ISSUER_PUBLICKEY);
+    xrplTrustlineStore.setMaxFee(process.env.XRPL_MAX_FEE_DROPS === undefined ? XrplTrustlineStore.DefaultMaxFee : parseInt(process.env.XRPL_MAX_FEE_DROPS))
+    publishers.push(xrplTrustlineStore)
+
+}
+const mariaDbStore = new MariaDbStore(dbInfo)
 mariaDbStore.setMaxAgeSeconds(process.env.MARIADBSTORE_MAXAGE_SECONDS === undefined ? MariaDbStore.DefaultMaxAgeSeconds : parseInt(process.env.MARIADBSTORE_MAXAGE_SECONDS))
-let publishers = [mariaDbStore, xrplTrustlineStore]
+publishers.push(mariaDbStore)
+
 let sourceError = new Map()
 
 app.get('/', (req, res) => {
