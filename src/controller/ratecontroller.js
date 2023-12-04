@@ -17,15 +17,16 @@ class RateController {
         }
         const quoteCcy = req.query.quote
         const at = req.query.at === undefined ? moment() : moment(req.query.at, 'YYYY-MM-DDTHHmmssZ')
-        const start = moment(at).subtract(1, 'minutes').toDate();
-        const end = moment(at).add(1, 'minutes').toDate();
+        const atUtc = at.utc()
+        const start = moment(atUtc).subtract(1, 'minutes').toDate();
+        const end = moment(atUtc).add(1, 'minutes').toDate();
 
         const result = await this.store.list(baseCcy, quoteCcy, start, end)
         if (result.length === 0) {
             JsonResponse.ok(res, null)
             return
         }
-        const closest = this.closest(result, at.toDate())
+        const closest = this.closest(result, atUtc.toDate())
         const avgRate = Utils.round(RateController.avgRate(result), 6)
         JsonResponse.ok(res, { baseCcy: closest.closest, quoteCcy: closest.quoteCcy, rate: avgRate, sourcecount: result.length, at: closest.at })
     }
