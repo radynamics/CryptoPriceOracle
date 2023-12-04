@@ -11,6 +11,7 @@ const RateController = require('./controller/ratecontroller');
 const ApiKeyController = require('./controller/apikeycontroller');
 const JsonResponse = require('./jsonresponse');
 const MariaDbStore = require('./publisher/mariadbstore')
+const moment = require('moment')
 
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -38,6 +39,7 @@ xrplTrustlineStore.setMaxFee(process.env.MAX_FEE_DROPS === undefined ? XrplTrust
 let mariaDbStore = new MariaDbStore(dbInfo)
 mariaDbStore.setMaxAgeSeconds(process.env.MARIADBSTORE_MAXAGE_SECONDS === undefined ? MariaDbStore.DefaultMaxAgeSeconds : parseInt(process.env.MARIADBSTORE_MAXAGE_SECONDS))
 let publishers = [mariaDbStore, xrplTrustlineStore]
+let sourceError = new Map()
 
 app.get('/', (req, res) => {
     res.send('Service up and running ☕')
@@ -116,13 +118,43 @@ async function fetchSources() {
 }
 async function fetchSource(baseCcy, quoteCcy, source) {
     const s = new ExchangeRateSource({ base: baseCcy, quote: quoteCcy }, source)
+    const key = source.url
     try {
+        // Skip if source is paused.
+        if (sourceError.get(key) !== undefined && sourceError.get(key).pausedUntil > new Date()) {
+            return
+        }
+
         const rate = await s.get()
+        sourceError.delete(key)
         return rate === undefined ? undefined : new FxRate(baseCcy, quoteCcy, rate, source.name)
     } catch (e) {
-        console.error(`Failed getting ${source.url}`)
+        try {
+            // Some sources return errors on api tresholds or are temporary not available.
+            pauseSource(e, source, key)
+        } catch (ef) {
+            console.error(ef)
+        }
+    }
+}
+function pauseSource(e, source, key) {
+    const PAUSE_MINUTES = 5
+    const paused = moment().add(PAUSE_MINUTES, 'minutes').toDate()
+    const running = moment().subtract(1, 'seconds').toDate()
+    if (sourceError.get(key) === undefined) {
+        sourceError.set(key, { errorCount: 0, pausedUntil: running })
+    }
+
+    const se = sourceError.get(key)
+    se.errorCount += 1
+    const THRESHOLD = 3
+    if (se.errorCount > THRESHOLD) {
+        se.pausedUntil = paused
+        console.error(`Failed getting ${source.url}. Source paused for ${PAUSE_MINUTES} min after ${THRESHOLD} errors in a row.`)
         console.error(e)
     }
+    console.info(`Failed getting ${source.url} for ${se.errorCount} times.`)
+    console.info(e)
 }
 
 async function getHealth(req, res) {
