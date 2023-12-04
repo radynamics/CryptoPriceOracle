@@ -209,7 +209,7 @@ async function getStatus(req, res) {
         stats.push({ name: publisher.getName(), status: await publisher.getStatus() })
     }
 
-    JsonResponse.ok(res, { started: started.toISOString(), provider: stats })
+    JsonResponse.ok(res, { started: started.toISOString(), publisher: stats })
 }
 function verifyPwr(req, res) {
     if (req.query.pwr !== adminPwr) {
