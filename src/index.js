@@ -10,7 +10,7 @@ require('dotenv').config()
 const RateController = require('./controller/ratecontroller');
 const ApiKeyController = require('./controller/apikeycontroller');
 const JsonResponse = require('./jsonresponse');
-const MariaDbStore = require('./publisher/mariadbstore')
+const MariaDbPublisher = require('./publisher/mariadbpublisher')
 const MariaDbApiKeyStore = require('./store/mariadbapikeystore')
 const MemoryApiKeyStore = require('./store/memoryapikeystore')
 const moment = require('moment')
@@ -52,10 +52,10 @@ const dbInfo = process.env.DB_HOST === undefined || process.env.DB_NAME === unde
 let rateStore = memoryPublisher
 let apiKeyStore = new MemoryApiKeyStore()
 if (dbInfo !== undefined) {
-    const mariaDbStore = new MariaDbStore(dbInfo)
-    mariaDbStore.setMaxAgeSeconds(process.env.MARIADBSTORE_MAXAGE_SECONDS === undefined ? MariaDbStore.DefaultMaxAgeSeconds : parseInt(process.env.MARIADBSTORE_MAXAGE_SECONDS))
-    publishers.push(mariaDbStore)
-    rateStore = mariaDbStore
+    const mariaDbPublisher = new MariaDbPublisher(dbInfo)
+    mariaDbPublisher.setMaxAgeSeconds(process.env.MARIADBPUBLISHER_MAXAGE_SECONDS === undefined ? MariaDbPublisher.DefaultMaxAgeSeconds : parseInt(process.env.MARIADBPUBLISHER_MAXAGE_SECONDS))
+    publishers.push(mariaDbPublisher)
+    rateStore = mariaDbPublisher
     apiKeyStore = new MariaDbApiKeyStore(dbInfo)
 }
 
@@ -102,9 +102,9 @@ async function initDb() {
     if (dbInfo === undefined) {
         return
     }
-    const mariaDbStore = new MariaDbStore(dbInfo)
-    if (!await mariaDbStore.anyTablePresent()) {
-        await mariaDbStore.initDb()
+    const mariaDbPublisher = new MariaDbPublisher(dbInfo)
+    if (!await mariaDbPublisher.anyTablePresent()) {
+        await mariaDbPublisher.initDb()
     }
 }
 

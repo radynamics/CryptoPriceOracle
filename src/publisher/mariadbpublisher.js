@@ -5,11 +5,11 @@ const FxRate = require('../model/fxrate');
 const ExchangeIdHelper = require('../model/exchangeidhelper');
 const Utils = require('../utils')
 
-class MariaDbStore {
+class MariaDbPublisher {
     static DefaultMaxAgeSeconds = 60 * 60 * 24 * 60
     constructor(dbInfo) {
         this.lastPublished = null
-        this.maxAgeSeconds = MariaDbStore.DefaultMaxAgeSeconds
+        this.maxAgeSeconds = MariaDbPublisher.DefaultMaxAgeSeconds
         this.pool = mariadb.createPool({ host: dbInfo.host, database: dbInfo.dbName, user: dbInfo.user, password: dbInfo.password, connectionLimit: 5 })
     }
 
@@ -97,7 +97,7 @@ class MariaDbStore {
     }
 
     getName() {
-        return "MariaDbStore"
+        return "MariaDbPublisher"
     }
 
     getLastPublished() {
@@ -154,4 +154,4 @@ class MariaDbStore {
     }
 }
 
-module.exports = MariaDbStore
+module.exports = MariaDbPublisher
