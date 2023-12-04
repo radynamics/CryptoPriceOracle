@@ -12,6 +12,7 @@ const ApiKeyController = require('./controller/apikeycontroller');
 const JsonResponse = require('./jsonresponse');
 const MariaDbStore = require('./publisher/mariadbstore')
 const MariaDbApiKeyStore = require('./store/mariadbapikeystore')
+const MemoryApiKeyStore = require('./store/memoryapikeystore')
 const moment = require('moment')
 
 const app = express()
@@ -23,7 +24,6 @@ const interval = process.env.PUBLISH_INTERVAL || 60000
 const unhealthyAfter = process.env.UNHEALTHY_AFTER === undefined ? 900000 : parseInt(process.env.UNHEALTHY_AFTER);
 const adminPwr = process.env.ADMINPWR
 if (adminPwr == null) throw new Error('env.ADMINPWR must be defined')
-const dbInfo = { host: process.env.DB_HOST, dbName: process.env.DB_NAME, user: process.env.DB_USER, password: process.env.DB_PASSWORD }
 const fetchCcys = process.env.FETCH_CURRENCIES === undefined ? [] : process.env.FETCH_CURRENCIES.split(',')
 
 if (process.env.LOG_INFO !== 'true') {
@@ -46,9 +46,18 @@ if (publishCurrencies.length > 0) {
     publishers.push(xrplTrustlineStore)
 
 }
-const mariaDbStore = new MariaDbStore(dbInfo)
-mariaDbStore.setMaxAgeSeconds(process.env.MARIADBSTORE_MAXAGE_SECONDS === undefined ? MariaDbStore.DefaultMaxAgeSeconds : parseInt(process.env.MARIADBSTORE_MAXAGE_SECONDS))
-publishers.push(mariaDbStore)
+const dbInfo = process.env.DB_HOST === undefined || process.env.DB_NAME === undefined
+    ? undefined
+    : { host: process.env.DB_HOST, dbName: process.env.DB_NAME, user: process.env.DB_USER, password: process.env.DB_PASSWORD }
+let rateStore = memoryStore
+let apiKeyStore = new MemoryApiKeyStore()
+if (dbInfo !== undefined) {
+    const mariaDbStore = new MariaDbStore(dbInfo)
+    mariaDbStore.setMaxAgeSeconds(process.env.MARIADBSTORE_MAXAGE_SECONDS === undefined ? MariaDbStore.DefaultMaxAgeSeconds : parseInt(process.env.MARIADBSTORE_MAXAGE_SECONDS))
+    publishers.push(mariaDbStore)
+    rateStore = mariaDbStore
+    apiKeyStore = new MariaDbApiKeyStore(dbInfo)
+}
 
 let sourceError = new Map()
 
@@ -56,8 +65,8 @@ app.get('/', (req, res) => {
     res.send('Service up and running ☕')
 })
 
-const apiKeyController = new ApiKeyController(new MariaDbApiKeyStore(dbInfo))
-const rateController = new RateController(mariaDbStore)
+const apiKeyController = new ApiKeyController(apiKeyStore)
+const rateController = new RateController(rateStore)
 const router = express.Router();
 app.get('/rate/:id', apiKeyController.auth, (req, res) => { rateController.getRate(req, res) });
 app.get('/apikey', (req, res) => { verifyPwr(req, res) ? apiKeyController.list(req, res) : {} });
@@ -90,6 +99,10 @@ function getJsonFiles(dir, files = []) {
     return files
 }
 async function initDb() {
+    if (dbInfo === undefined) {
+        return
+    }
+    const mariaDbStore = new MariaDbStore(dbInfo)
     if (!await mariaDbStore.anyTablePresent()) {
         await mariaDbStore.initDb()
     }
