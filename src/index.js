@@ -4,7 +4,7 @@ const bodyParser = require('body-parser')
 const fs = require('fs')
 const ExchangeRateSource = require('./exchangeratesource')
 const FxRate = require('./model/fxrate')
-const MemoryStore = require('./publisher/memorystore')
+const MemoryPublisher = require('./publisher/memorypublisher')
 const XrplTrustlineStore = require('./publisher/xrpltrustlinestore')
 require('dotenv').config()
 const RateController = require('./controller/ratecontroller');
@@ -34,9 +34,9 @@ const started = new Date()
 
 let provider = []
 let publishers = []
-const memoryStore = new MemoryStore()
-memoryStore.setMaxAgeSeconds(process.env.MEMORYSTORE_MAXAGE_SECONDS === undefined ? MemoryStore.DefaultMaxAgeSeconds : parseInt(process.env.MEMORYSTORE_MAXAGE_SECONDS))
-publishers.push(memoryStore)
+const memoryPublisher = new MemoryPublisher()
+memoryPublisher.setMaxAgeSeconds(process.env.MEMORYPUBLISHER_MAXAGE_SECONDS === undefined ? MemoryPublisher.DefaultMaxAgeSeconds : parseInt(process.env.MEMORYPUBLISHER_MAXAGE_SECONDS))
+publishers.push(memoryPublisher)
 
 const publishCurrencies = process.env.XRPL_PUBLISH_CURRENCIES === undefined ? [] : process.env.XRPL_PUBLISH_CURRENCIES.split(',')
 if (publishCurrencies.length > 0) {
@@ -49,7 +49,7 @@ if (publishCurrencies.length > 0) {
 const dbInfo = process.env.DB_HOST === undefined || process.env.DB_NAME === undefined
     ? undefined
     : { host: process.env.DB_HOST, dbName: process.env.DB_NAME, user: process.env.DB_USER, password: process.env.DB_PASSWORD }
-let rateStore = memoryStore
+let rateStore = memoryPublisher
 let apiKeyStore = new MemoryApiKeyStore()
 if (dbInfo !== undefined) {
     const mariaDbStore = new MariaDbStore(dbInfo)
