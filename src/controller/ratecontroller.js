@@ -16,7 +16,12 @@ class RateController {
             return
         }
         const quoteCcy = req.query.quote
-        const at = req.query.at === undefined ? moment() : moment(req.query.at, 'YYYY-MM-DDTHHmmssZ')
+        const FORMAT = 'YYYY-MM-DDTHHmmssZ'
+        const at = req.query.at === undefined ? moment() : moment(req.query.at, FORMAT)
+        if (!at.isValid()) {
+            JsonResponse.error(res, `param at must be a valid format ${FORMAT}`)
+            return
+        }
         const atUtc = at.utc()
         const start = moment(atUtc).subtract(1, 'minutes').toDate();
         const end = moment(atUtc).add(1, 'minutes').toDate();
