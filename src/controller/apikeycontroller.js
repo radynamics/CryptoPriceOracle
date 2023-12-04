@@ -19,7 +19,8 @@ class ApiKeyController {
         }
         const apiKey = crypto.randomUUID().replaceAll('-', '')
         const entry = { apiKey: apiKey, name: req.body.name, validUntil: new Date('9999-12-31T23:59:59Z') }
-        JsonResponse.ok(res, await this.store.insert(entry))
+        await this.store.insert(entry)
+        JsonResponse.ok(res, entry)
     }
 
     async auth(req, res, next) {
