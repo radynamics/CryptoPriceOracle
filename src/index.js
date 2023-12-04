@@ -11,6 +11,7 @@ const RateController = require('./controller/ratecontroller');
 const ApiKeyController = require('./controller/apikeycontroller');
 const JsonResponse = require('./jsonresponse');
 const MariaDbStore = require('./publisher/mariadbstore')
+const MariaDbApiKeyStore = require('./store/mariadbapikeystore')
 const moment = require('moment')
 
 const app = express()
@@ -55,7 +56,7 @@ app.get('/', (req, res) => {
     res.send('Service up and running ☕')
 })
 
-const apiKeyController = new ApiKeyController(dbInfo)
+const apiKeyController = new ApiKeyController(new MariaDbApiKeyStore(dbInfo))
 const rateController = new RateController(mariaDbStore)
 const router = express.Router();
 app.get('/rate/:id', apiKeyController.auth, (req, res) => { rateController.getRate(req, res) });
