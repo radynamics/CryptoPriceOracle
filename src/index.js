@@ -37,9 +37,6 @@ const started = new Date()
 
 let provider = []
 let publishers = []
-const memoryPublisher = new MemoryPublisher()
-memoryPublisher.setMaxAgeSeconds(process.env.MEMORYPUBLISHER_MAXAGE_SECONDS === undefined ? MemoryPublisher.DefaultMaxAgeSeconds : parseInt(process.env.MEMORYPUBLISHER_MAXAGE_SECONDS))
-publishers.push(memoryPublisher)
 
 const publishCurrencies = process.env.XRPL_PUBLISH_CURRENCIES === undefined ? [] : process.env.XRPL_PUBLISH_CURRENCIES.split(',')
 if (publishCurrencies.length > 0) {
@@ -52,13 +49,19 @@ if (publishCurrencies.length > 0) {
 const dbInfo = process.env.DB_HOST === undefined || process.env.DB_NAME === undefined
     ? undefined
     : { host: process.env.DB_HOST, dbName: process.env.DB_NAME, user: process.env.DB_USER, password: process.env.DB_PASSWORD }
-let rateStore = memoryPublisher
-let apiKeyStore = new MemoryApiKeyStore()
-if (dbInfo !== undefined) {
-    const mariaDbPublisher = new MariaDbPublisher(dbInfo)
-    mariaDbPublisher.setMaxAgeSeconds(process.env.MARIADBPUBLISHER_MAXAGE_SECONDS === undefined ? MariaDbPublisher.DefaultMaxAgeSeconds : parseInt(process.env.MARIADBPUBLISHER_MAXAGE_SECONDS))
-    publishers.push(mariaDbPublisher)
-    rateStore = mariaDbPublisher
+let rateStore = undefined
+let apiKeyStore = undefined
+if (dbInfo === undefined) {
+    const p = new MemoryPublisher()
+    p.setMaxAgeSeconds(process.env.MEMORYPUBLISHER_MAXAGE_SECONDS === undefined ? MemoryPublisher.DefaultMaxAgeSeconds : parseInt(process.env.MEMORYPUBLISHER_MAXAGE_SECONDS))
+    publishers.push(p)
+    rateStore = p
+    apiKeyStore = new MemoryApiKeyStore()
+} else {
+    const p = new MariaDbPublisher(dbInfo)
+    p.setMaxAgeSeconds(process.env.MARIADBPUBLISHER_MAXAGE_SECONDS === undefined ? MariaDbPublisher.DefaultMaxAgeSeconds : parseInt(process.env.MARIADBPUBLISHER_MAXAGE_SECONDS))
+    publishers.push(p)
+    rateStore = p
     apiKeyStore = new MariaDbApiKeyStore(dbInfo)
 }
 
