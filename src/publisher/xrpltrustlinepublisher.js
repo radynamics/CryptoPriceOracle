@@ -4,7 +4,7 @@ const moment = require('moment');
 const RateController = require('../controller/ratecontroller');
 const Utils = require('../utils')
 
-class XrplTrustlineStore {
+class XrplTrustlinePublisher {
     static DefaultMaxFee = 1010
     constructor(endpoint, accountPublicKey, accountSecret, issuerPublicKey) {
         this.endpoint = endpoint
@@ -12,7 +12,7 @@ class XrplTrustlineStore {
         this.accountSecret = accountSecret
         this.issuerPublicKey = issuerPublicKey
         this.rates = new Map()
-        this.maxFee = XrplTrustlineStore.DefaultMaxFee
+        this.maxFee = XrplTrustlinePublisher.DefaultMaxFee
         this.lastPublished = null
         this.lastFee = null
         this.submissionsSinceStart = 0
@@ -183,7 +183,7 @@ class XrplTrustlineStore {
     }
 
     getName() {
-        return "XrplTrustlineStore"
+        return "XrplTrustlinePublisher"
     }
 
     getLastPublished() {
@@ -219,4 +219,4 @@ class XrplTrustlineStore {
     }
 }
 
-module.exports = XrplTrustlineStore
+module.exports = XrplTrustlinePublisher

@@ -5,7 +5,7 @@ const fs = require('fs')
 const ExchangeRateSource = require('./exchangeratesource')
 const FxRate = require('./model/fxrate')
 const MemoryPublisher = require('./publisher/memorypublisher')
-const XrplTrustlineStore = require('./publisher/xrpltrustlinestore')
+const XrplTrustlinePublisher = require('./publisher/xrpltrustlinepublisher')
 require('dotenv').config()
 const RateController = require('./controller/ratecontroller');
 const ApiKeyController = require('./controller/apikeycontroller');
@@ -40,10 +40,10 @@ publishers.push(memoryPublisher)
 
 const publishCurrencies = process.env.XRPL_PUBLISH_CURRENCIES === undefined ? [] : process.env.XRPL_PUBLISH_CURRENCIES.split(',')
 if (publishCurrencies.length > 0) {
-    const xrplTrustlineStore = new XrplTrustlineStore(process.env.XRPL_ENDPOINT, process.env.XRPL_ACCOUNT_PUBLICKEY, process.env.XRPL_ACCOUNT_SECRET, process.env.XRPL_ISSUER_PUBLICKEY);
-    xrplTrustlineStore.setMaxFee(process.env.XRPL_MAX_FEE_DROPS === undefined ? XrplTrustlineStore.DefaultMaxFee : parseInt(process.env.XRPL_MAX_FEE_DROPS))
-    xrplTrustlineStore.setPublishCurrencies(new Set(publishCurrencies))
-    publishers.push(xrplTrustlineStore)
+    const xrplTrustlinePublisher = new XrplTrustlinePublisher(process.env.XRPL_ENDPOINT, process.env.XRPL_ACCOUNT_PUBLICKEY, process.env.XRPL_ACCOUNT_SECRET, process.env.XRPL_ISSUER_PUBLICKEY);
+    xrplTrustlinePublisher.setMaxFee(process.env.XRPL_MAX_FEE_DROPS === undefined ? XrplTrustlinePublisher.DefaultMaxFee : parseInt(process.env.XRPL_MAX_FEE_DROPS))
+    xrplTrustlinePublisher.setPublishCurrencies(new Set(publishCurrencies))
+    publishers.push(xrplTrustlinePublisher)
 
 }
 const dbInfo = process.env.DB_HOST === undefined || process.env.DB_NAME === undefined
