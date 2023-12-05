@@ -61,7 +61,7 @@ if (dbInfo === undefined) {
     apiKeyStore = new MemoryApiKeyStore()
 } else {
     const p = createDbProvider(dbInfo)
-    p.setMaxAgeSeconds(process.env.MARIADBPUBLISHER_MAXAGE_SECONDS === undefined ? MariaDbPublisher.DefaultMaxAgeSeconds : parseInt(process.env.MARIADBPUBLISHER_MAXAGE_SECONDS))
+    p.setMaxAgeSeconds(process.env.DBPUBLISHER_MAXAGE_SECONDS === undefined ? MariaDbPublisher.DefaultMaxAgeSeconds : parseInt(process.env.DBPUBLISHER_MAXAGE_SECONDS))
     publishers.push(p)
     rateStore = p
     apiKeyStore = createKeyStoreDbProvider(dbInfo)
