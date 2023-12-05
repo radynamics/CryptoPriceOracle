@@ -22,7 +22,7 @@ class MariaDbApiKeyStore {
     toList(rows) {
         var result = []
         for (const row of rows) {
-            result.push({ apikey: row.ApiKey, name: row.ConsumerName, validuntil: Utils.utcStringToDateTime(row.ValidUntil) })
+            result.push({ apikey: row.apiKey, name: row.consumerName, validuntil: Utils.utcStringToDateTime(row.validUntil) })
         }
         return result
     }
@@ -31,7 +31,7 @@ class MariaDbApiKeyStore {
         try {
             conn = await this.pool.getConnection()
             let validUntilText = Utils.dateTimeToUtcString(entry.validUntil)
-            const res = await conn.query("INSERT INTO apikey (ApiKey, ConsumerName, ValidUntil) VALUES (?, ?, ?)", [entry.apiKey, entry.name, validUntilText])
+            const res = await conn.query("INSERT INTO apikey (apiKey, consumerName, validUntil) VALUES (?, ?, ?)", [entry.apiKey, entry.name, validUntilText])
             if (res.affectedRows !== 1) {
                 throw new Error(`Inserting entry failed. ${JSON.stringify(entry)}`)
             }
@@ -45,7 +45,7 @@ class MariaDbApiKeyStore {
         let conn
         try {
             conn = await this.pool.getConnection()
-            const res = await conn.query("SELECT * FROM apikey WHERE ApiKey = ?", [apiKey])
+            const res = await conn.query("SELECT * FROM apikey WHERE apiKey = ?", [apiKey])
             return res.length === 0 ? null : this.toList(res)[0]
         } catch (err) {
             throw err

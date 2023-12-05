@@ -13,7 +13,7 @@ class MariaDbRateStore {
         try {
             conn = await this.pool.getConnection()
             let atText = Utils.dateTimeToUtcString(rate.at)
-            const res = await conn.query("INSERT INTO rate (BaseCcy, QuoteCcy, Rate, ExchangeId, Dt) VALUES (?, ?, ?, ?, ?)", [rate.baseCcy, rate.quoteCcy, rate.rate, exchangeId, atText])
+            const res = await conn.query("INSERT INTO rate (baseCcy, quoteCcy, rate, exchangeId, dt) VALUES (?, ?, ?, ?, ?)", [rate.baseCcy, rate.quoteCcy, rate.rate, exchangeId, atText])
             if (res.affectedRows !== 1) {
                 throw new Error(`Inserting rate failed. ${JSON.stringify(rate)}`)
             }
@@ -29,7 +29,7 @@ class MariaDbRateStore {
         try {
             conn = await this.pool.getConnection()
             let beforeText = Utils.dateTimeToUtcString(before)
-            await conn.query("DELETE FROM rate WHERE Dt < ?", [beforeText])
+            await conn.query("DELETE FROM rate WHERE dt < ?", [beforeText])
         } catch (err) {
             throw err
         } finally {
@@ -43,7 +43,7 @@ class MariaDbRateStore {
             conn = await this.pool.getConnection()
             let startText = Utils.dateTimeToUtcString(start)
             let endText = Utils.dateTimeToUtcString(end)
-            const res = await conn.query("SELECT * FROM rate WHERE BaseCcy = ? AND QuoteCcy = ? AND Dt BETWEEN ? AND ?", [baseCcy, quoteCcy, startText, endText])
+            const res = await conn.query("SELECT * FROM rate WHERE baseCcy = ? AND quoteCcy = ? AND dt BETWEEN ? AND ?", [baseCcy, quoteCcy, startText, endText])
             return this.toFxRateList(res)
         } catch (err) {
             throw err
@@ -55,8 +55,8 @@ class MariaDbRateStore {
     toFxRateList(rows) {
         var result = []
         for (const row of rows) {
-            let o = new FxRate(row.BaseCcy, row.QuoteCcy, row.Rate, row.ExchangeName)
-            o.at = Utils.utcStringToDateTime(row.Dt)
+            let o = new FxRate(row.baseCcy, row.quoteCcy, row.rate, row.exchangeName)
+            o.at = Utils.utcStringToDateTime(row.dt)
             result.push(o)
         }
         return result
@@ -93,34 +93,34 @@ class MariaDbRateStore {
             conn = await this.pool.getConnection()
             {
                 const sql = "CREATE TABLE `exchange` (" +
-                    "`ExchangeId` INT NOT NULL AUTO_INCREMENT," +
-                    "`ExchangeName` VARCHAR(64) NOT NULL," +
-                    "PRIMARY KEY (`ExchangeId`)," +
-                    "UNIQUE KEY `ExchangeName_UNIQUE` (`ExchangeName`));"
+                    "`exchangeId` INT NOT NULL AUTO_INCREMENT," +
+                    "`exchangeName` VARCHAR(64) NOT NULL," +
+                    "PRIMARY KEY (`exchangeId`)," +
+                    "UNIQUE KEY `exchangeName_UNIQUE` (`exchangeName`));"
                 await conn.query(sql)
             }
             {
                 const sql = "CREATE TABLE `rate` (" +
-                    "`RateId` INT NOT NULL AUTO_INCREMENT," +
-                    "`BaseCcy` VARCHAR(10) NOT NULL," +
-                    "`QuoteCcy` VARCHAR(10) NOT NULL," +
-                    "`Rate` DOUBLE NOT NULL," +
-                    "`ExchangeId` INT NOT NULL," +
-                    "`Dt` DATETIME NOT NULL," +
-                    "PRIMARY KEY (`RateId`)," +
-                    "INDEX `IX_BASE_QUOTE_DT` (`BaseCcy` ASC, `QuoteCcy` ASC, `Dt` ASC) VISIBLE," +
-                    "INDEX `FK_ExchangeId_idx` (`ExchangeId` ASC) VISIBLE," +
-                    "CONSTRAINT `FK_ExchangeId` FOREIGN KEY (`ExchangeId`) REFERENCES `exchange` (`ExchangeId`) ON DELETE NO ACTION ON UPDATE NO ACTION);"
+                    "`rateId` INT NOT NULL AUTO_INCREMENT," +
+                    "`baseCcy` VARCHAR(10) NOT NULL," +
+                    "`quoteCcy` VARCHAR(10) NOT NULL," +
+                    "`rate` DOUBLE NOT NULL," +
+                    "`exchangeId` INT NOT NULL," +
+                    "`dt` DATETIME NOT NULL," +
+                    "PRIMARY KEY (`rateId`)," +
+                    "INDEX `IX_BASE_QUOTE_DT` (`baseCcy` ASC, `quoteCcy` ASC, `dt` ASC) VISIBLE," +
+                    "INDEX `FK_exchangeId_idx` (`exchangeId` ASC) VISIBLE," +
+                    "CONSTRAINT `FK_exchangeId` FOREIGN KEY (`exchangeId`) REFERENCES `exchange` (`exchangeId`) ON DELETE NO ACTION ON UPDATE NO ACTION);"
                 await conn.query(sql)
             }
             {
                 const sql = "CREATE TABLE `apikey` (" +
-                    "`ApiKeyId` INT NOT NULL AUTO_INCREMENT," +
-                    "`ApiKey` VARCHAR(32) NOT NULL," +
-                    "`ConsumerName` VARCHAR(64) NOT NULL," +
-                    "`ValidUntil` DATETIME NOT NULL," +
-                    "PRIMARY KEY (`ApiKeyId`)," +
-                    "UNIQUE KEY `ApiKey_UNIQUE` (`ApiKey`))"
+                    "`apiKeyId` INT NOT NULL AUTO_INCREMENT," +
+                    "`apiKey` VARCHAR(32) NOT NULL," +
+                    "`consumerName` VARCHAR(64) NOT NULL," +
+                    "`validUntil` DATETIME NOT NULL," +
+                    "PRIMARY KEY (`apiKeyId`)," +
+                    "UNIQUE KEY `apiKey_UNIQUE` (`apiKey`))"
                 await conn.query(sql)
             }
         } catch (err) {

@@ -10,11 +10,11 @@ class PostgresDbExchangeStore {
         let conn
         try {
             conn = await this.pool.connect()
-            const res = await conn.query(`INSERT INTO exchange ("ExchangeName") VALUES ($1) RETURNING "ExchangeId"`, [name])
+            const res = await conn.query(`INSERT INTO exchange ("exchangeName") VALUES ($1) RETURNING "exchangeId"`, [name])
             if (res.rowCount !== 1) {
                 throw new Error(`Inserting entry failed. ${JSON.stringify(name)}`)
             }
-            return await this.id(res.rows[0].ExchangeId)
+            return await this.id(res.rows[0].exchangeId)
         } catch (err) {
             throw err
         } finally {
@@ -26,7 +26,7 @@ class PostgresDbExchangeStore {
         let conn
         try {
             conn = await this.pool.connect()
-            const res = await conn.query(`SELECT * FROM exchange WHERE "ExchangeName" = $1`, [name])
+            const res = await conn.query(`SELECT * FROM exchange WHERE "exchangeName" = $1`, [name])
             return res.rows.length === 0 ? undefined : this.toList(res.rows)[0]
         } catch (err) {
             throw err
@@ -39,7 +39,7 @@ class PostgresDbExchangeStore {
         let conn
         try {
             conn = await this.pool.connect()
-            const res = await conn.query(`SELECT * FROM exchange WHERE "ExchangeId" = $1`, [id])
+            const res = await conn.query(`SELECT * FROM exchange WHERE "exchangeId" = $1`, [id])
             return res.rows.length === 0 ? undefined : this.toList(res.rows)[0]
         } catch (err) {
             throw err
@@ -51,7 +51,7 @@ class PostgresDbExchangeStore {
     toList(rows) {
         var result = []
         for (const row of rows) {
-            result.push({ id: row.ExchangeId, name: row.ExchangeName })
+            result.push({ id: row.exchangeId, name: row.exchangeName })
         }
         return result
     }

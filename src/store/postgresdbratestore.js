@@ -14,7 +14,7 @@ class PostgresDbRateStore {
         try {
             conn = await this.pool.connect()
             let atText = Utils.dateTimeToUtcString(rate.at)
-            const res = await conn.query(`INSERT INTO rate ("BaseCcy", "QuoteCcy", "Rate", "ExchangeId", "Dt") VALUES ($1, $2, $3, $4, $5)`, [rate.baseCcy, rate.quoteCcy, rate.rate, exchangeId, atText])
+            const res = await conn.query(`INSERT INTO rate ("baseCcy", "quoteCcy", "rate", "exchangeId", "dt") VALUES ($1, $2, $3, $4, $5)`, [rate.baseCcy, rate.quoteCcy, rate.rate, exchangeId, atText])
             if (res.rowCount !== 1) {
                 throw new Error(`Inserting rate failed. ${JSON.stringify(rate)}`)
             }
@@ -30,7 +30,7 @@ class PostgresDbRateStore {
         try {
             conn = await this.pool.connect()
             let beforeText = Utils.dateTimeToUtcString(before)
-            await conn.query(`DELETE FROM rate WHERE "Dt" < $1`, [beforeText])
+            await conn.query(`DELETE FROM rate WHERE "dt" < $1`, [beforeText])
         } catch (err) {
             throw err
         } finally {
@@ -44,7 +44,7 @@ class PostgresDbRateStore {
             conn = await this.pool.connect()
             let startText = Utils.dateTimeToUtcString(start)
             let endText = Utils.dateTimeToUtcString(end)
-            const res = await conn.query(`SELECT * FROM rate WHERE "BaseCcy" = $1 AND "QuoteCcy" = $2 AND "Dt" BETWEEN $3 AND $4`, [baseCcy, quoteCcy, startText, endText])
+            const res = await conn.query(`SELECT * FROM rate WHERE "baseCcy" = $1 AND "quoteCcy" = $2 AND "dt" BETWEEN $3 AND $4`, [baseCcy, quoteCcy, startText, endText])
             return this.toFxRateList(res.rows)
         } catch (err) {
             throw err
@@ -56,8 +56,8 @@ class PostgresDbRateStore {
     toFxRateList(rows) {
         var result = []
         for (const row of rows) {
-            let o = new FxRate(row.BaseCcy, row.QuoteCcy, row.Rate, row.ExchangeName)
-            o.at = Utils.utcStringToDateTime(row.Dt)
+            let o = new FxRate(row.baseCcy, row.quoteCcy, row.rate, row.exchangeName)
+            o.at = Utils.utcStringToDateTime(row.dt)
             result.push(o)
         }
         return result
@@ -94,35 +94,35 @@ class PostgresDbRateStore {
             conn = await this.pool.connect()
             {
                 const sql = `CREATE TABLE exchange (
-                    "ExchangeId" integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 ),
-                    "ExchangeName" character varying(64) NOT NULL,
-                    PRIMARY KEY ("ExchangeId"),
-                    CONSTRAINT "ExchangeName_UNIQUE" UNIQUE ("ExchangeName")
+                    "exchangeId" integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 ),
+                    "exchangeName" character varying(64) NOT NULL,
+                    PRIMARY KEY ("exchangeId"),
+                    CONSTRAINT "exchangeName_UNIQUE" UNIQUE ("exchangeName")
                 );`
                 await conn.query(sql)
             }
             {
                 const sql = `CREATE TABLE rate (
-                    "RateId" integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 ),
-                    "BaseCcy" character varying(10) NOT NULL,
-                    "QuoteCcy" character varying NOT NULL,
-                    "Rate" double precision NOT NULL,
-                    "ExchangeId" integer NOT NULL,
-                    "Dt" timestamp without time zone NOT NULL,
-                    PRIMARY KEY ("RateId"),
-                    FOREIGN KEY ("ExchangeId") REFERENCES exchange ("ExchangeId") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION NOT VALID
+                    "rateId" integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 ),
+                    "baseCcy" character varying(10) NOT NULL,
+                    "quoteCcy" character varying NOT NULL,
+                    "rate" double precision NOT NULL,
+                    "exchangeId" integer NOT NULL,
+                    "dt" timestamp without time zone NOT NULL,
+                    PRIMARY KEY ("rateId"),
+                    FOREIGN KEY ("exchangeId") REFERENCES exchange ("exchangeId") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION NOT VALID
                 );
-                CREATE INDEX ON rate USING btree ("BaseCcy" ASC NULLS LAST, "QuoteCcy" ASC NULLS LAST, "Dt" ASC NULLS LAST) WITH (deduplicate_items=True);`
+                CREATE INDEX ON rate USING btree ("baseCcy" ASC NULLS LAST, "quoteCcy" ASC NULLS LAST, "dt" ASC NULLS LAST) WITH (deduplicate_items=True);`
                 await conn.query(sql)
             }
             {
                 const sql = `CREATE TABLE apikey (
-                    "ApiKeyId" integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 ),
-                    "ApiKey" character varying(32) NOT NULL,
-                    "ConsumerName" character varying(64) NOT NULL,
-                    "ValidUntil" timestamp without time zone NOT NULL,
-                    PRIMARY KEY ("ApiKeyId"),
-                    CONSTRAINT "ApiKey_UNIQUE" UNIQUE ("ApiKey")
+                    "apiKeyId" integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 ),
+                    "apiKey" character varying(32) NOT NULL,
+                    "consumerName" character varying(64) NOT NULL,
+                    "validUntil" timestamp without time zone NOT NULL,
+                    PRIMARY KEY ("apiKeyId"),
+                    CONSTRAINT "apiKey_UNIQUE" UNIQUE ("apiKey")
                 );`
                 await conn.query(sql)
             }

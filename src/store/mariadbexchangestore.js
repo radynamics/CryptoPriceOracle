@@ -10,7 +10,7 @@ class MariaDbExchangeStore {
         let conn
         try {
             conn = await this.pool.getConnection()
-            const res = await conn.query("INSERT INTO exchange (ExchangeName) VALUES (?)", [name])
+            const res = await conn.query("INSERT INTO exchange (exchangeName) VALUES (?)", [name])
             if (res.affectedRows !== 1) {
                 throw new Error(`Inserting entry failed. ${JSON.stringify(name)}`)
             }
@@ -26,7 +26,7 @@ class MariaDbExchangeStore {
         let conn
         try {
             conn = await this.pool.getConnection()
-            const res = await conn.query("SELECT * FROM exchange WHERE ExchangeName = ?", [name])
+            const res = await conn.query("SELECT * FROM exchange WHERE exchangeName = ?", [name])
             return res.length === 0 ? undefined : this.toList(res)[0]
         } catch (err) {
             throw err
@@ -39,7 +39,7 @@ class MariaDbExchangeStore {
         let conn
         try {
             conn = await this.pool.getConnection()
-            const res = await conn.query("SELECT * FROM exchange WHERE ExchangeId = ?", [id])
+            const res = await conn.query("SELECT * FROM exchange WHERE exchangeId = ?", [id])
             return res.length === 0 ? undefined : this.toList(res)[0]
         } catch (err) {
             throw err
@@ -51,7 +51,7 @@ class MariaDbExchangeStore {
     toList(rows) {
         var result = []
         for (const row of rows) {
-            result.push({ id: row.ExchangeId, name: row.ExchangeName })
+            result.push({ id: row.exchangeId, name: row.exchangeName })
         }
         return result
     }
