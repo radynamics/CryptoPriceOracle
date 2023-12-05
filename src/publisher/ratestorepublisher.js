@@ -53,13 +53,6 @@ class RateStorePublisher {
     async getStatus() {
         return { name: this.rateStore.constructor.name, size: new String(await this.size()) }
     }
-
-    async anyTablePresent() {
-        return await this.rateStore.anyTablePresent()
-    }
-    async initDb() {
-        return await this.rateStore.initDb()
-    }
 }
 
 module.exports = RateStorePublisher
