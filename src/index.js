@@ -61,16 +61,6 @@ app.get('/status', apiKeyController.authAdminPwr, (req, res) => { statusControll
 app.use('/', router)
 app.get('/', (req, res) => { res.send('Service up and running ☕') })
 
-async function initStore() {
-    if (dbInfo === undefined) {
-        return
-    }
-    const store = new StoreFactory(dbInfo).create(process.env.DB_PROVIDER)
-    if (!await store.initialized()) {
-        await store.initialize()
-    }
-}
-
 async function doWork() {
     const result = await sourceDefinitions.fetchAll()
     if (result.length === 0) {
@@ -84,7 +74,9 @@ async function doWork() {
 app.listen(port, async () => {
     console.log(`Started, listening on port ${port}`)
     sourceDefinitions.load()
-    await initStore()
+    if (!await store.initialized()) {
+        await store.initialize()
+    }
 
     setInterval(function () {
         doWork()
