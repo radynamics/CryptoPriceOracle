@@ -75,7 +75,7 @@ class MariaDbRateStore {
         }
     }
 
-    async anyTablePresent() {
+    async initialized() {
         let conn
         try {
             conn = await this.pool.getConnection()
@@ -87,7 +87,7 @@ class MariaDbRateStore {
             if (conn) conn.end()
         }
     }
-    async initDb() {
+    async initialize() {
         let conn
         try {
             conn = await this.pool.getConnection()

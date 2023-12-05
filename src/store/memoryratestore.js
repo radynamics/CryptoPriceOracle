@@ -1,30 +1,18 @@
 'use strict'
-const moment = require('moment');
 
 class MemoryRateStore {
-    static DefaultMaxAgeSeconds = 3600
     constructor() {
         this.rates = new Map()
-        this.lastPublished = null
-        this.maxAgeSeconds = MemoryRateStore.DefaultMaxAgeSeconds
     }
 
-    publishAll(rates) {
-        for (const fxRate of rates) {
-            this.publish(fxRate)
-        }
-        this.removeOutdated()
-    }
-    publish(rate) {
+    async insert(rate, exchangeId) {
         if (!this.exists(rate.baseCcy)) {
             this.rates.set(rate.baseCcy, [])
         }
         this.rates.get(rate.baseCcy).push(rate)
-        this.lastPublished = new Date()
     }
 
-    removeOutdated() {
-        var before = moment().subtract(this.maxAgeSeconds, 'seconds').toDate()
+    async deleteBefore(before) {
         for (let [baseCcy, value] of this.rates) {
             this.rates.set(baseCcy, this.rates.get(baseCcy).filter((o) => o.at >= before))
         }
@@ -49,20 +37,11 @@ class MemoryRateStore {
         return count
     }
 
-    setMaxAgeSeconds(value) {
-        this.maxAgeSeconds = value
+    initialized() {
+        return true
     }
 
-    getName() {
-        return "MemoryPublisher"
-    }
-
-    getLastPublished() {
-        return this.lastPublished
-    }
-
-    async getStatus() {
-        return { lastPublished: this.getLastPublished(), size: this.size() }
+    initialize() {
     }
 }
 

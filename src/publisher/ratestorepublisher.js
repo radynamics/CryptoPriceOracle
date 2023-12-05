@@ -2,12 +2,12 @@
 const moment = require('moment')
 const ExchangeIdHelper = require('../model/exchangeidhelper');
 
-class DbPublisher {
+class RateStorePublisher {
     static DefaultMaxAgeSeconds = 60 * 60 * 24 * 60
-    constructor(dbHandler) {
+    constructor(store) {
         this.lastPublished = null
-        this.maxAgeSeconds = DbPublisher.DefaultMaxAgeSeconds
-        this.dbHandler = dbHandler
+        this.maxAgeSeconds = RateStorePublisher.DefaultMaxAgeSeconds
+        this.store = store
     }
 
     publishAll(rates) {
@@ -21,21 +21,21 @@ class DbPublisher {
         if (exchangeId === ExchangeIdHelper.unknown) {
             console.warn(`Exchange ${rate.exchangeName} is unknown.`)
         }
-        await this.dbHandler.insert(rate, exchangeId)
+        await this.store.insert(rate, exchangeId)
         this.lastPublished = new Date()
     }
 
     async removeOutdated() {
         var before = moment().subtract(this.maxAgeSeconds, 'seconds').toDate()
-        await this.dbHandler.deleteBefore(before)
+        await this.store.deleteBefore(before)
     }
 
     async list(baseCcy, quoteCcy, start, end) {
-        return await this.dbHandler.list(baseCcy, quoteCcy, start, end)
+        return await this.store.list(baseCcy, quoteCcy, start, end)
     }
 
     async size() {
-        return await this.dbHandler.size()
+        return await this.store.size()
     }
 
     setMaxAgeSeconds(value) {
@@ -43,7 +43,7 @@ class DbPublisher {
     }
 
     getName() {
-        return "DbPublisher"
+        return "RateStorePublisher"
     }
 
     getLastPublished() {
@@ -55,11 +55,11 @@ class DbPublisher {
     }
 
     async anyTablePresent() {
-        return await this.dbHandler.anyTablePresent()
+        return await this.store.anyTablePresent()
     }
     async initDb() {
-        return await this.dbHandler.initDb()
+        return await this.store.initDb()
     }
 }
 
-module.exports = DbPublisher
+module.exports = RateStorePublisher

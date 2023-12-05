@@ -76,7 +76,7 @@ class PostgresDbRateStore {
         }
     }
 
-    async anyTablePresent() {
+    async initialized() {
         let conn
         try {
             conn = await this.pool.connect()
@@ -88,7 +88,7 @@ class PostgresDbRateStore {
             if (conn) conn.release()
         }
     }
-    async initDb() {
+    async initialize() {
         let conn
         try {
             conn = await this.pool.connect()

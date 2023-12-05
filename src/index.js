@@ -9,14 +9,14 @@ const ExchangeRateSource = require('./exchangeratesource')
 const FxRate = require('./model/fxrate')
 const JsonResponse = require('./jsonresponse');
 
-const MariaDbApiKeyStore = require('./store/mariadbapikeystore')
-const PostgresDbApiKeyStore = require('./store/postgresdbapikeystore')
+const MemoryRateStore = require('./store/memoryratestore')
 const MemoryApiKeyStore = require('./store/memoryapikeystore')
 const MariaDbRateStore = require('./store/mariadbratestore')
+const MariaDbApiKeyStore = require('./store/mariadbapikeystore')
 const PostgresDbRateStore = require('./store/postgresdbratestore')
-const MemoryRateStore = require('./store/memoryratestore')
+const PostgresDbApiKeyStore = require('./store/postgresdbapikeystore')
 
-const DbPublisher = require('./publisher/dbpublisher')
+const RateStorePublisher = require('./publisher/ratestorepublisher')
 const XrplTrustlinePublisher = require('./publisher/xrpltrustlinepublisher')
 
 const RateController = require('./controller/ratecontroller');
@@ -53,21 +53,11 @@ if (publishCurrencies.length > 0) {
 const dbInfo = process.env.DB_HOST === undefined || process.env.DB_NAME === undefined
     ? undefined
     : { host: process.env.DB_HOST, dbName: process.env.DB_NAME, user: process.env.DB_USER, password: process.env.DB_PASSWORD }
-let rateStore = undefined
-let apiKeyStore = undefined
-if (dbInfo === undefined) {
-    const p = new MemoryRateStore()
-    p.setMaxAgeSeconds(process.env.MEMORYPUBLISHER_MAXAGE_SECONDS === undefined ? MemoryRateStore.DefaultMaxAgeSeconds : parseInt(process.env.MEMORYPUBLISHER_MAXAGE_SECONDS))
-    publishers.push(p)
-    rateStore = p
-    apiKeyStore = new MemoryApiKeyStore()
-} else {
-    const p = new DbPublisher(createRateStore(dbInfo))
-    p.setMaxAgeSeconds(process.env.DBPUBLISHER_MAXAGE_SECONDS === undefined ? DbPublisher.DefaultMaxAgeSeconds : parseInt(process.env.DBPUBLISHER_MAXAGE_SECONDS))
-    publishers.push(p)
-    rateStore = p
-    apiKeyStore = createKeyStoreDbProvider(dbInfo)
-}
+const rateStore = createRateStore(dbInfo)
+const p = new RateStorePublisher(rateStore)
+p.setMaxAgeSeconds(process.env.RATESTORE_MAXAGE_SECONDS === undefined ? RateStorePublisher.DefaultMaxAgeSeconds : parseInt(process.env.RATESTORE_MAXAGE_SECONDS))
+publishers.push(p)
+const apiKeyStore = createKeyStoreDbProvider(dbInfo)
 
 let sourceError = new Map()
 
@@ -86,6 +76,9 @@ app.get('/status', getStatus)
 app.use('/', router)
 
 function createRateStore(dbInfo) {
+    if (dbInfo === undefined) {
+        return new MemoryRateStore()
+    }
     switch (process.env.DB_PROVIDER) {
         case 'mariadb': return new MariaDbRateStore(dbInfo)
         case 'postgres': return new PostgresDbRateStore(dbInfo)
@@ -93,6 +86,9 @@ function createRateStore(dbInfo) {
     }
 }
 function createKeyStoreDbProvider(dbInfo) {
+    if (dbInfo === undefined) {
+        return new MemoryApiKeyStore()
+    }
     switch (process.env.DB_PROVIDER) {
         case 'mariadb': return new MariaDbApiKeyStore(dbInfo)
         case 'postgres': return new PostgresDbApiKeyStore(dbInfo)
@@ -122,13 +118,13 @@ function getJsonFiles(dir, files = []) {
     }
     return files
 }
-async function initDb() {
+async function initStore() {
     if (dbInfo === undefined) {
         return
     }
     const store = createRateStore(dbInfo)
-    if (!await store.anyTablePresent()) {
-        await store.initDb()
+    if (!await store.initialized()) {
+        await store.initialize()
     }
 }
 
@@ -240,7 +236,7 @@ function verifyPwr(req, res) {
 app.listen(port, async () => {
     console.log(`Started, listening on port ${port}`)
     loadProvider()
-    await initDb()
+    await initStore()
 
     setInterval(function () {
         doWork()
