@@ -47,10 +47,6 @@ const p = new RateStorePublisher(store)
 p.setMaxAgeSeconds(process.env.RATESTORE_MAXAGE_SECONDS === undefined ? RateStorePublisher.DefaultMaxAgeSeconds : parseInt(process.env.RATESTORE_MAXAGE_SECONDS))
 publishers.push(p)
 
-app.get('/', (req, res) => {
-    res.send('Service up and running ☕')
-})
-
 const apiKeyController = new ApiKeyController(store.getApiKeyStore(), adminPwr)
 const rateController = new RateController(store.getRateStore())
 const healthController = new HealthController(publishers, process.env.UNHEALTHY_AFTER === undefined ? 900000 : parseInt(process.env.UNHEALTHY_AFTER))
@@ -63,6 +59,7 @@ app.post('/apikey', apiKeyController.authAdminPwr, (req, res) => { apiKeyControl
 app.get('/health', (req, res) => { healthController.get(req, res) })
 app.get('/status', apiKeyController.authAdminPwr, (req, res) => { statusController.get(req, res) })
 app.use('/', router)
+app.get('/', (req, res) => { res.send('Service up and running ☕') })
 
 async function initStore() {
     if (dbInfo === undefined) {
