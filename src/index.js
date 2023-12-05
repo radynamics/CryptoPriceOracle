@@ -1,14 +1,11 @@
 'use strict'
 const express = require('express')
 const bodyParser = require('body-parser')
-const fs = require('fs')
 require('dotenv').config()
-const moment = require('moment')
 
-const ExchangeRateSource = require('./exchangeratesource')
-const FxRate = require('./model/fxrate')
 const JsonResponse = require('./jsonresponse');
 
+const Sources = require('./provider/sources')
 const StoreFactory = require('./store/storefactory')
 const RateStorePublisher = require('./publisher/ratestorepublisher')
 const XrplTrustlinePublisher = require('./publisher/xrpltrustlinepublisher')
@@ -25,7 +22,6 @@ const interval = process.env.PUBLISH_INTERVAL || 60000
 const unhealthyAfter = process.env.UNHEALTHY_AFTER === undefined ? 900000 : parseInt(process.env.UNHEALTHY_AFTER);
 const adminPwr = process.env.ADMINPWR
 if (adminPwr == null) throw new Error('env.ADMINPWR must be defined')
-const fetchCcys = process.env.FETCH_CURRENCIES === undefined ? [] : process.env.FETCH_CURRENCIES.split(',')
 
 if (process.env.LOG_INFO !== 'true') {
     console.info = function () { };
@@ -33,7 +29,7 @@ if (process.env.LOG_INFO !== 'true') {
 
 const started = new Date()
 
-let provider = []
+const sources = new Sources(process.env.FETCH_CURRENCIES === undefined ? [] : process.env.FETCH_CURRENCIES.split(','))
 let publishers = []
 
 const xrplTrustlinePublishConfig = process.env.XRPL_TRUSTLINE_PUBLISH_CONFIG === undefined ? [] : JSON.parse(process.env.XRPL_TRUSTLINE_PUBLISH_CONFIG)
@@ -52,8 +48,6 @@ const p = new RateStorePublisher(store)
 p.setMaxAgeSeconds(process.env.RATESTORE_MAXAGE_SECONDS === undefined ? RateStorePublisher.DefaultMaxAgeSeconds : parseInt(process.env.RATESTORE_MAXAGE_SECONDS))
 publishers.push(p)
 
-let sourceError = new Map()
-
 app.get('/', (req, res) => {
     res.send('Service up and running ☕')
 })
@@ -68,29 +62,6 @@ app.get('/health', getHealth)
 app.get('/status', (req, res) => { verifyPwr(req, res) ? getStatus(req, res) : {} })
 app.use('/', router)
 
-function loadProvider() {
-    let files = getJsonFiles('./provider')
-    for (const file of files) {
-        const data = fs.readFileSync(file)
-        const content = JSON.parse(data.toString())
-        if (fetchCcys.length === 0 || fetchCcys.includes(content.symbol)) {
-            provider.push(content)
-            console.info(`${file} loaded`)
-        }
-    }
-}
-function getJsonFiles(dir, files = []) {
-    const fileList = fs.readdirSync(dir).filter(file => file.endsWith('.json'))
-    for (const file of fileList) {
-        const name = `${dir}/${file}`
-        if (fs.statSync(name).isDirectory()) {
-            getFiles(name, files)
-        } else {
-            files.push(name)
-        }
-    }
-    return files
-}
 async function initStore() {
     if (dbInfo === undefined) {
         return
@@ -102,76 +73,13 @@ async function initStore() {
 }
 
 async function doWork() {
-    const result = await fetchSources()
+    const result = await sources.fetchAll()
     if (result.length === 0) {
         return
     }
     for (const publisher of publishers) {
         await publisher.publishAll(result)
     }
-}
-
-async function fetchSources() {
-    var promises = []
-    for (const p of provider) {
-        const baseCcy = p.symbol
-        for (const q of p.quotes) {
-            const quoteCcy = q.symbol
-            for (const s of q.sources) {
-                promises.push(fetchSource(baseCcy, quoteCcy, s))
-            }
-        }
-    }
-
-    var result = []
-    for (const r of await Promise.allSettled(promises)) {
-        if (r.status === 'fulfilled') {
-            if (r.value !== undefined) {
-                result.push(r.value)
-            }
-        }
-    }
-    return result
-}
-async function fetchSource(baseCcy, quoteCcy, source) {
-    const s = new ExchangeRateSource({ base: baseCcy, quote: quoteCcy }, source)
-    const key = source.url
-    try {
-        // Skip if source is paused.
-        if (sourceError.get(key) !== undefined && sourceError.get(key).pausedUntil > new Date()) {
-            return
-        }
-
-        const rate = await s.get()
-        sourceError.delete(key)
-        return rate === undefined ? undefined : new FxRate(baseCcy, quoteCcy, rate, source.name)
-    } catch (e) {
-        try {
-            // Some sources return errors on api tresholds or are temporary not available.
-            pauseSource(e, source, key)
-        } catch (ef) {
-            console.error(ef)
-        }
-    }
-}
-function pauseSource(e, source, key) {
-    const PAUSE_MINUTES = 5
-    const paused = moment().add(PAUSE_MINUTES, 'minutes').toDate()
-    const running = moment().subtract(1, 'seconds').toDate()
-    if (sourceError.get(key) === undefined) {
-        sourceError.set(key, { errorCount: 0, pausedUntil: running })
-    }
-
-    const se = sourceError.get(key)
-    se.errorCount += 1
-    const THRESHOLD = 3
-    if (se.errorCount > THRESHOLD) {
-        se.pausedUntil = paused
-        console.error(`Failed getting ${source.url}. Source paused for ${PAUSE_MINUTES} min after ${THRESHOLD} errors in a row.`)
-        console.error(e)
-    }
-    console.info(`Failed getting ${source.url} for ${se.errorCount} times.`)
-    console.info(e)
 }
 
 async function getHealth(req, res) {
@@ -207,7 +115,7 @@ function verifyPwr(req, res) {
 
 app.listen(port, async () => {
     console.log(`Started, listening on port ${port}`)
-    loadProvider()
+    sources.load()
     await initStore()
 
     setInterval(function () {
