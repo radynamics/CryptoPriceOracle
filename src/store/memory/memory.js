@@ -20,6 +20,10 @@ class Memory {
         return this.exchangeStore
     }
 
+    getName() {
+        return "memory"
+    }
+
     initialized() {
         return true
     }

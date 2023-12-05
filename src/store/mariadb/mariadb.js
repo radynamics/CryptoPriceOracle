@@ -22,6 +22,10 @@ class MariaDb {
         return this.exchangeStore
     }
 
+    getName() {
+        return "mariaDb"
+    }
+
     async initialized() {
         let conn
         try {

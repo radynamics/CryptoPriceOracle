@@ -22,6 +22,10 @@ class Postgres {
         return this.exchangeStore
     }
 
+    getName() {
+        return "postgres"
+    }
+
     async initialized() {
         let conn
         try {

@@ -3,11 +3,12 @@ const moment = require('moment')
 
 class RateStorePublisher {
     static DefaultMaxAgeSeconds = 60 * 60 * 24 * 60
-    constructor(rateStore, exchangeStore) {
+    constructor(store) {
+        this.store = store
         this.lastPublished = null
         this.maxAgeSeconds = RateStorePublisher.DefaultMaxAgeSeconds
-        this.rateStore = rateStore
-        this.exchangeStore = exchangeStore
+        this.rateStore = this.store.getRateStore()
+        this.exchangeStore = this.store.getExchangeStore()
     }
 
     async publishAll(rates) {
@@ -51,7 +52,7 @@ class RateStorePublisher {
     }
 
     async getStatus() {
-        return { name: this.rateStore.constructor.name, size: new String(await this.size()) }
+        return { name: this.store.getName(), size: new String(await this.size()) }
     }
 }
 
