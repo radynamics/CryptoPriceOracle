@@ -1,34 +1,19 @@
 'use strict'
-const moment = require('moment')
 const pg = require('pg')
 const FxRate = require('../model/fxrate');
-const ExchangeIdHelper = require('../model/exchangeidhelper');
 const Utils = require('../utils')
 
-class PostgresDbPublisher {
-    static DefaultMaxAgeSeconds = 60 * 60 * 24 * 60
+class PostgresDbRateStore {
     constructor(dbInfo) {
         this.dbInfo = dbInfo
-        this.lastPublished = null
-        this.maxAgeSeconds = PostgresDbPublisher.DefaultMaxAgeSeconds
         this.pool = new pg.Pool({ host: dbInfo.host, database: dbInfo.dbName, user: dbInfo.user, password: dbInfo.password, timezone: 'UTC' })
     }
 
-    publishAll(rates) {
-        for (const fxRate of rates) {
-            this.publish(fxRate)
-        }
-        this.removeOutdated()
-    }
-    async publish(rate) {
+    async insert(rate, exchangeId) {
         let conn
         try {
             conn = await this.pool.connect()
             let atText = Utils.dateTimeToUtcString(rate.at)
-            const exchangeId = ExchangeIdHelper.toId(rate.exchangeName)
-            if (exchangeId === ExchangeIdHelper.unknown) {
-                console.warn(`Exchange ${rate.exchangeName} is unknown.`)
-            }
             const res = await conn.query(`INSERT INTO rate ("BaseCcy", "QuoteCcy", "Rate", "ExchangeId", "Dt") VALUES ($1, $2, $3, $4, $5)`, [rate.baseCcy, rate.quoteCcy, rate.rate, exchangeId, atText])
             if (res.rowCount !== 1) {
                 throw new Error(`Inserting rate failed. ${JSON.stringify(rate)}`)
@@ -38,11 +23,9 @@ class PostgresDbPublisher {
         } finally {
             if (conn) conn.release()
         }
-        this.lastPublished = new Date()
     }
 
-    async removeOutdated() {
-        var before = moment().subtract(this.maxAgeSeconds, 'seconds').toDate()
+    async deleteBefore(before) {
         let conn
         try {
             conn = await this.pool.connect()
@@ -91,22 +74,6 @@ class PostgresDbPublisher {
         } finally {
             if (conn) conn.release()
         }
-    }
-
-    setMaxAgeSeconds(value) {
-        this.maxAgeSeconds = value
-    }
-
-    getName() {
-        return "PostgresDbPublisher"
-    }
-
-    getLastPublished() {
-        return this.lastPublished
-    }
-
-    async getStatus() {
-        return { lastPublished: this.getLastPublished(), size: new String(await this.size()) }
     }
 
     async anyTablePresent() {
@@ -159,4 +126,4 @@ class PostgresDbPublisher {
     }
 }
 
-module.exports = PostgresDbPublisher
+module.exports = PostgresDbRateStore

@@ -1,12 +1,12 @@
 'use strict'
 const moment = require('moment');
 
-class MemoryPublisher {
+class MemoryRateStore {
     static DefaultMaxAgeSeconds = 3600
     constructor() {
         this.rates = new Map()
         this.lastPublished = null
-        this.maxAgeSeconds = MemoryPublisher.DefaultMaxAgeSeconds
+        this.maxAgeSeconds = MemoryRateStore.DefaultMaxAgeSeconds
     }
 
     publishAll(rates) {
@@ -66,4 +66,4 @@ class MemoryPublisher {
     }
 }
 
-module.exports = MemoryPublisher
+module.exports = MemoryRateStore

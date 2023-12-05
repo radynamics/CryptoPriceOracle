@@ -1,33 +1,18 @@
 'use strict'
-const moment = require('moment')
 const mariadb = require('mariadb')
 const FxRate = require('../model/fxrate');
-const ExchangeIdHelper = require('../model/exchangeidhelper');
 const Utils = require('../utils')
 
-class MariaDbPublisher {
-    static DefaultMaxAgeSeconds = 60 * 60 * 24 * 60
+class MariaDbRateStore {
     constructor(dbInfo) {
-        this.lastPublished = null
-        this.maxAgeSeconds = MariaDbPublisher.DefaultMaxAgeSeconds
         this.pool = mariadb.createPool({ host: dbInfo.host, database: dbInfo.dbName, user: dbInfo.user, password: dbInfo.password, connectionLimit: 5 })
     }
 
-    publishAll(rates) {
-        for (const fxRate of rates) {
-            this.publish(fxRate)
-        }
-        this.removeOutdated()
-    }
-    async publish(rate) {
+    async insert(rate, exchangeId) {
         let conn
         try {
             conn = await this.pool.getConnection()
             let atText = Utils.dateTimeToUtcString(rate.at)
-            const exchangeId = ExchangeIdHelper.toId(rate.exchangeName)
-            if (exchangeId === ExchangeIdHelper.unknown) {
-                console.warn(`Exchange ${rate.exchangeName} is unknown.`)
-            }
             const res = await conn.query("INSERT INTO rate (BaseCcy, QuoteCcy, Rate, ExchangeId, Dt) VALUES (?, ?, ?, ?, ?)", [rate.baseCcy, rate.quoteCcy, rate.rate, exchangeId, atText])
             if (res.affectedRows !== 1) {
                 throw new Error(`Inserting rate failed. ${JSON.stringify(rate)}`)
@@ -37,11 +22,9 @@ class MariaDbPublisher {
         } finally {
             if (conn) conn.end()
         }
-        this.lastPublished = new Date()
     }
 
-    async removeOutdated() {
-        var before = moment().subtract(this.maxAgeSeconds, 'seconds').toDate()
+    async deleteBefore(before) {
         let conn
         try {
             conn = await this.pool.getConnection()
@@ -92,22 +75,6 @@ class MariaDbPublisher {
         }
     }
 
-    setMaxAgeSeconds(value) {
-        this.maxAgeSeconds = value
-    }
-
-    getName() {
-        return "MariaDbPublisher"
-    }
-
-    getLastPublished() {
-        return this.lastPublished
-    }
-
-    async getStatus() {
-        return { lastPublished: this.getLastPublished(), size: new String(await this.size()) }
-    }
-
     async anyTablePresent() {
         let conn
         try {
@@ -154,4 +121,4 @@ class MariaDbPublisher {
     }
 }
 
-module.exports = MariaDbPublisher
+module.exports = MariaDbRateStore

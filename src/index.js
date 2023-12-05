@@ -12,9 +12,11 @@ const JsonResponse = require('./jsonresponse');
 const MariaDbApiKeyStore = require('./store/mariadbapikeystore')
 const PostgresDbApiKeyStore = require('./store/postgresdbapikeystore')
 const MemoryApiKeyStore = require('./store/memoryapikeystore')
-const MariaDbPublisher = require('./publisher/mariadbpublisher')
-const PostgresDbPublisher = require('./publisher/postgresdbpublisher')
-const MemoryPublisher = require('./publisher/memorypublisher')
+const MariaDbRateStore = require('./store/mariadbratestore')
+const PostgresDbRateStore = require('./store/postgresdbratestore')
+const MemoryRateStore = require('./store/memoryratestore')
+
+const DbPublisher = require('./publisher/dbpublisher')
 const XrplTrustlinePublisher = require('./publisher/xrpltrustlinepublisher')
 
 const RateController = require('./controller/ratecontroller');
@@ -54,14 +56,14 @@ const dbInfo = process.env.DB_HOST === undefined || process.env.DB_NAME === unde
 let rateStore = undefined
 let apiKeyStore = undefined
 if (dbInfo === undefined) {
-    const p = new MemoryPublisher()
-    p.setMaxAgeSeconds(process.env.MEMORYPUBLISHER_MAXAGE_SECONDS === undefined ? MemoryPublisher.DefaultMaxAgeSeconds : parseInt(process.env.MEMORYPUBLISHER_MAXAGE_SECONDS))
+    const p = new MemoryRateStore()
+    p.setMaxAgeSeconds(process.env.MEMORYPUBLISHER_MAXAGE_SECONDS === undefined ? MemoryRateStore.DefaultMaxAgeSeconds : parseInt(process.env.MEMORYPUBLISHER_MAXAGE_SECONDS))
     publishers.push(p)
     rateStore = p
     apiKeyStore = new MemoryApiKeyStore()
 } else {
-    const p = createDbProvider(dbInfo)
-    p.setMaxAgeSeconds(process.env.DBPUBLISHER_MAXAGE_SECONDS === undefined ? MariaDbPublisher.DefaultMaxAgeSeconds : parseInt(process.env.DBPUBLISHER_MAXAGE_SECONDS))
+    const p = new DbPublisher(createRateStore(dbInfo))
+    p.setMaxAgeSeconds(process.env.DBPUBLISHER_MAXAGE_SECONDS === undefined ? DbPublisher.DefaultMaxAgeSeconds : parseInt(process.env.DBPUBLISHER_MAXAGE_SECONDS))
     publishers.push(p)
     rateStore = p
     apiKeyStore = createKeyStoreDbProvider(dbInfo)
@@ -83,10 +85,10 @@ app.get('/health', getHealth)
 app.get('/status', getStatus)
 app.use('/', router)
 
-function createDbProvider(dbInfo) {
+function createRateStore(dbInfo) {
     switch (process.env.DB_PROVIDER) {
-        case 'mariadb': return new MariaDbPublisher(dbInfo)
-        case 'postgres': return new PostgresDbPublisher(dbInfo)
+        case 'mariadb': return new MariaDbRateStore(dbInfo)
+        case 'postgres': return new PostgresDbRateStore(dbInfo)
         default: throw new Error(`env.DB_PROVIDER ${env.DB_PROVIDER} is unknown.`)
     }
 }
@@ -124,9 +126,9 @@ async function initDb() {
     if (dbInfo === undefined) {
         return
     }
-    const p = createDbProvider(dbInfo)
-    if (!await p.anyTablePresent()) {
-        await p.initDb()
+    const store = createRateStore(dbInfo)
+    if (!await store.anyTablePresent()) {
+        await store.initDb()
     }
 }
 
