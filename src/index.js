@@ -75,7 +75,7 @@ app.get('/rate/:id', apiKeyController.auth, (req, res) => { rateController.getRa
 app.get('/apikey', (req, res) => { verifyPwr(req, res) ? apiKeyController.list(req, res) : {} });
 app.post('/apikey', (req, res) => { verifyPwr(req, res) ? apiKeyController.create(req, res) : {} });
 app.get('/health', getHealth)
-app.get('/status', getStatus)
+app.get('/status', (req, res) => { verifyPwr(req, res) ? getStatus(req, res) : {} })
 app.use('/', router)
 
 function createRateStore(dbInfo) {
@@ -230,7 +230,6 @@ async function getHealth(req, res) {
     }
 }
 async function getStatus(req, res) {
-    if (!verifyPwr(req, res)) return
     var stats = []
     for (const publisher of publishers) {
         stats.push({ name: publisher.getName(), lastPublished: publisher.getLastPublished(), store: await publisher.getStatus() })
