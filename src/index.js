@@ -44,11 +44,10 @@ let publishers = []
 
 const publishCurrencies = process.env.XRPL_PUBLISH_CURRENCIES === undefined ? [] : process.env.XRPL_PUBLISH_CURRENCIES.split(',')
 if (publishCurrencies.length > 0) {
-    const xrplTrustlinePublisher = new XrplTrustlinePublisher(process.env.XRPL_ENDPOINT, process.env.XRPL_ACCOUNT_PUBLICKEY, process.env.XRPL_ACCOUNT_SECRET, process.env.XRPL_ISSUER_PUBLICKEY);
-    xrplTrustlinePublisher.setMaxFee(process.env.XRPL_MAX_FEE_DROPS === undefined ? XrplTrustlinePublisher.DefaultMaxFee : parseInt(process.env.XRPL_MAX_FEE_DROPS))
-    xrplTrustlinePublisher.setPublishCurrencies(new Set(publishCurrencies))
-    publishers.push(xrplTrustlinePublisher)
-
+    const p = new XrplTrustlinePublisher(process.env.XRPL_ENDPOINT, process.env.XRPL_ACCOUNT_PUBLICKEY, process.env.XRPL_ACCOUNT_SECRET, process.env.XRPL_ISSUER_PUBLICKEY);
+    p.setMaxFee(process.env.XRPL_MAX_FEE_DROPS === undefined ? XrplTrustlinePublisher.DefaultMaxFee : parseInt(process.env.XRPL_MAX_FEE_DROPS))
+    p.setPublishCurrencies(new Set(publishCurrencies))
+    publishers.push(p)
 }
 const dbInfo = process.env.DB_HOST === undefined || process.env.DB_NAME === undefined
     ? undefined
