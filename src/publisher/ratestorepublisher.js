@@ -35,10 +35,6 @@ class RateStorePublisher {
         return await this.rateStore.list(baseCcy, quoteCcy, start, end)
     }
 
-    async size() {
-        return await this.rateStore.size()
-    }
-
     setMaxAgeSeconds(value) {
         this.maxAgeSeconds = value
     }
@@ -52,7 +48,7 @@ class RateStorePublisher {
     }
 
     async getStatus() {
-        return { name: this.store.getName(), size: new String(await this.size()) }
+        return { name: this.store.getName(), rateCount: new String(await this.rateStore.count()) }
     }
 }
 

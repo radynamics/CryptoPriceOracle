@@ -61,7 +61,7 @@ class RateStore {
         return result
     }
 
-    async size() {
+    async count() {
         let conn
         try {
             conn = await this.pool.connect()

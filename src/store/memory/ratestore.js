@@ -29,7 +29,7 @@ class RateStore {
         return this.rates.get(baseCcy).filter((o) => o.quoteCcy === quoteCcy && start <= o.at && o.at < end)
     }
 
-    size() {
+    count() {
         var count = 0;
         for (var r of this.rates) {
             count += r[1].length
