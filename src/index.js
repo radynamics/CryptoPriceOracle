@@ -51,17 +51,17 @@ app.get('/', (req, res) => {
     res.send('Service up and running ☕')
 })
 
-const apiKeyController = new ApiKeyController(store.getApiKeyStore())
+const apiKeyController = new ApiKeyController(store.getApiKeyStore(), adminPwr)
 const rateController = new RateController(store.getRateStore())
 const healthController = new HealthController(publishers, process.env.UNHEALTHY_AFTER === undefined ? 900000 : parseInt(process.env.UNHEALTHY_AFTER))
 const statusController = new StatusController(publishers, new Date())
 
 const router = express.Router();
 app.get('/rate/:id', apiKeyController.auth, (req, res) => { rateController.getRate(req, res) });
-app.get('/apikey', (req, res) => { verifyPwr(req, res) ? apiKeyController.list(req, res) : {} });
-app.post('/apikey', (req, res) => { verifyPwr(req, res) ? apiKeyController.create(req, res) : {} });
+app.get('/apikey', apiKeyController.authAdminPwr, (req, res) => { apiKeyController.list(req, res) });
+app.post('/apikey', apiKeyController.authAdminPwr, (req, res) => { apiKeyController.create(req, res) });
 app.get('/health', (req, res) => { healthController.get(req, res) })
-app.get('/status', (req, res) => { verifyPwr(req, res) ? statusController.get(req, res) : {} })
+app.get('/status', apiKeyController.authAdminPwr, (req, res) => { statusController.get(req, res) })
 app.use('/', router)
 
 async function initStore() {
@@ -82,14 +82,6 @@ async function doWork() {
     for (const publisher of publishers) {
         await publisher.publishAll(result)
     }
-}
-
-function verifyPwr(req, res) {
-    if (req.query.pwr !== adminPwr) {
-        JsonResponse.error(res, 'invalid password')
-        return false
-    }
-    return true
 }
 
 app.listen(port, async () => {

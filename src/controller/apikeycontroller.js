@@ -3,9 +3,11 @@ const JsonResponse = require('../jsonresponse')
 const crypto = require('crypto')
 
 class ApiKeyController {
-    constructor(store) {
-        this.auth = this.auth.bind(this)
+    constructor(store, adminPwr) {
         this.store = store
+        this.adminPwr = adminPwr
+        this.auth = this.auth.bind(this)
+        this.authAdminPwr = this.authAdminPwr.bind(this)
     }
 
     async list(req, res) {
@@ -21,6 +23,14 @@ class ApiKeyController {
         const entry = { apiKey: apiKey, name: req.body.name, validUntil: new Date('9999-12-31T23:59:59Z') }
         await this.store.insert(entry)
         JsonResponse.ok(res, entry)
+    }
+
+    async authAdminPwr(req, res, next) {
+        if (req.query.pwr !== this.adminPwr) {
+            JsonResponse.error(res, 'invalid password')
+            return
+        }
+        next()
     }
 
     async auth(req, res, next) {
