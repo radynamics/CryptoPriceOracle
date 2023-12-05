@@ -93,6 +93,15 @@ class PostgresDbRateStore {
         try {
             conn = await this.pool.connect()
             {
+                const sql = `CREATE TABLE exchange (
+                    "ExchangeId" integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 ),
+                    "ExchangeName" character varying(64) NOT NULL,
+                    PRIMARY KEY ("ExchangeId"),
+                    CONSTRAINT "ExchangeName_UNIQUE" UNIQUE ("ExchangeName")
+                );`
+                await conn.query(sql)
+            }
+            {
                 const sql = `CREATE TABLE rate (
                     "RateId" integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 ),
                     "BaseCcy" character varying(10) NOT NULL,
@@ -100,7 +109,8 @@ class PostgresDbRateStore {
                     "Rate" double precision NOT NULL,
                     "ExchangeId" integer NOT NULL,
                     "Dt" timestamp without time zone NOT NULL,
-                    PRIMARY KEY ("RateId")
+                    PRIMARY KEY ("RateId"),
+                    FOREIGN KEY ("ExchangeId") REFERENCES exchange ("ExchangeId") MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION NOT VALID
                 );
                 CREATE INDEX ON rate USING btree ("BaseCcy" ASC NULLS LAST, "QuoteCcy" ASC NULLS LAST, "Dt" ASC NULLS LAST) WITH (deduplicate_items=True);`
                 await conn.query(sql)

@@ -1,41 +1,41 @@
 'use strict'
 const moment = require('moment')
-const ExchangeIdHelper = require('../model/exchangeidhelper');
 
 class RateStorePublisher {
     static DefaultMaxAgeSeconds = 60 * 60 * 24 * 60
-    constructor(store) {
+    constructor(rateStore, exchangeStore) {
         this.lastPublished = null
         this.maxAgeSeconds = RateStorePublisher.DefaultMaxAgeSeconds
-        this.store = store
+        this.rateStore = rateStore
+        this.exchangeStore = exchangeStore
     }
 
-    publishAll(rates) {
+    async publishAll(rates) {
         for (const rate of rates) {
-            this.insert(rate)
+            await this.insert(rate)
         }
         this.removeOutdated()
     }
     async insert(rate) {
-        const exchangeId = ExchangeIdHelper.toId(rate.exchangeName)
-        if (exchangeId === ExchangeIdHelper.unknown) {
-            console.warn(`Exchange ${rate.exchangeName} is unknown.`)
+        let exchange = await this.exchangeStore.get(rate.exchangeName)
+        if (exchange === undefined) {
+            exchange = await this.exchangeStore.insert(rate.exchangeName)
         }
-        await this.store.insert(rate, exchangeId)
+        await this.rateStore.insert(rate, exchange.id)
         this.lastPublished = new Date()
     }
 
     async removeOutdated() {
         var before = moment().subtract(this.maxAgeSeconds, 'seconds').toDate()
-        await this.store.deleteBefore(before)
+        await this.rateStore.deleteBefore(before)
     }
 
     async list(baseCcy, quoteCcy, start, end) {
-        return await this.store.list(baseCcy, quoteCcy, start, end)
+        return await this.rateStore.list(baseCcy, quoteCcy, start, end)
     }
 
     async size() {
-        return await this.store.size()
+        return await this.rateStore.size()
     }
 
     setMaxAgeSeconds(value) {
@@ -51,14 +51,14 @@ class RateStorePublisher {
     }
 
     async getStatus() {
-        return { name: this.store.constructor.name, size: new String(await this.size()) }
+        return { name: this.rateStore.constructor.name, size: new String(await this.size()) }
     }
 
     async anyTablePresent() {
-        return await this.store.anyTablePresent()
+        return await this.rateStore.anyTablePresent()
     }
     async initDb() {
-        return await this.store.initDb()
+        return await this.rateStore.initDb()
     }
 }
 

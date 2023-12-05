@@ -92,6 +92,14 @@ class MariaDbRateStore {
         try {
             conn = await this.pool.getConnection()
             {
+                const sql = "CREATE TABLE `exchange` (" +
+                    "`ExchangeId` INT NOT NULL AUTO_INCREMENT," +
+                    "`ExchangeName` VARCHAR(64) NOT NULL," +
+                    "PRIMARY KEY (`ExchangeId`)," +
+                    "UNIQUE KEY `ExchangeName_UNIQUE` (`ExchangeName`));"
+                await conn.query(sql)
+            }
+            {
                 const sql = "CREATE TABLE `rate` (" +
                     "`RateId` INT NOT NULL AUTO_INCREMENT," +
                     "`BaseCcy` VARCHAR(10) NOT NULL," +
@@ -100,7 +108,9 @@ class MariaDbRateStore {
                     "`ExchangeId` INT NOT NULL," +
                     "`Dt` DATETIME NOT NULL," +
                     "PRIMARY KEY (`RateId`)," +
-                    "INDEX `IX_BASE_QUOTE_DT` (`BaseCcy` ASC, `QuoteCcy` ASC, `Dt` ASC) VISIBLE)"
+                    "INDEX `IX_BASE_QUOTE_DT` (`BaseCcy` ASC, `QuoteCcy` ASC, `Dt` ASC) VISIBLE," +
+                    "INDEX `FK_ExchangeId_idx` (`ExchangeId` ASC) VISIBLE," +
+                    "CONSTRAINT `FK_ExchangeId` FOREIGN KEY (`ExchangeId`) REFERENCES `exchange` (`ExchangeId`) ON DELETE NO ACTION ON UPDATE NO ACTION);"
                 await conn.query(sql)
             }
             {

@@ -11,10 +11,13 @@ const JsonResponse = require('./jsonresponse');
 
 const MemoryRateStore = require('./store/memoryratestore')
 const MemoryApiKeyStore = require('./store/memoryapikeystore')
+const MemoryExchangeStore = require('./store/memoryexchangestore')
 const MariaDbRateStore = require('./store/mariadbratestore')
 const MariaDbApiKeyStore = require('./store/mariadbapikeystore')
+const MariaDbExchangeStore = require('./store/mariadbexchangestore')
 const PostgresDbRateStore = require('./store/postgresdbratestore')
 const PostgresDbApiKeyStore = require('./store/postgresdbapikeystore')
+const PostgresDbExchangeStore = require('./store/postgresdbexchangestore')
 
 const RateStorePublisher = require('./publisher/ratestorepublisher')
 const XrplTrustlinePublisher = require('./publisher/xrpltrustlinepublisher')
@@ -54,7 +57,7 @@ const dbInfo = process.env.DB_HOST === undefined || process.env.DB_NAME === unde
     ? undefined
     : { host: process.env.DB_HOST, dbName: process.env.DB_NAME, user: process.env.DB_USER, password: process.env.DB_PASSWORD }
 const rateStore = createRateStore(dbInfo)
-const p = new RateStorePublisher(rateStore)
+const p = new RateStorePublisher(rateStore, createExchangeStore(dbInfo))
 p.setMaxAgeSeconds(process.env.RATESTORE_MAXAGE_SECONDS === undefined ? RateStorePublisher.DefaultMaxAgeSeconds : parseInt(process.env.RATESTORE_MAXAGE_SECONDS))
 publishers.push(p)
 const apiKeyStore = createKeyStoreDbProvider(dbInfo)
@@ -82,6 +85,16 @@ function createRateStore(dbInfo) {
     switch (process.env.DB_PROVIDER) {
         case 'mariadb': return new MariaDbRateStore(dbInfo)
         case 'postgres': return new PostgresDbRateStore(dbInfo)
+        default: throw new Error(`env.DB_PROVIDER ${env.DB_PROVIDER} is unknown.`)
+    }
+}
+function createExchangeStore(dbInfo) {
+    if (dbInfo === undefined) {
+        return new MemoryExchangeStore()
+    }
+    switch (process.env.DB_PROVIDER) {
+        case 'mariadb': return new MariaDbExchangeStore(dbInfo)
+        case 'postgres': return new PostgresDbExchangeStore(dbInfo)
         default: throw new Error(`env.DB_PROVIDER ${env.DB_PROVIDER} is unknown.`)
     }
 }
@@ -134,7 +147,7 @@ async function doWork() {
         return
     }
     for (const publisher of publishers) {
-        publisher.publishAll(result)
+        await publisher.publishAll(result)
     }
 }
 
