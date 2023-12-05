@@ -10,7 +10,7 @@ class MariaDbPublisher {
     constructor(dbInfo) {
         this.lastPublished = null
         this.maxAgeSeconds = MariaDbPublisher.DefaultMaxAgeSeconds
-        this.pool = mariadb.createPool({ host: dbInfo.host, database: dbInfo.dbName, user: dbInfo.user, password: dbInfo.password, connectionLimit: 5, dateStrings: true })
+        this.pool = mariadb.createPool({ host: dbInfo.host, database: dbInfo.dbName, user: dbInfo.user, password: dbInfo.password, connectionLimit: 5 })
     }
 
     publishAll(rates) {
@@ -73,7 +73,7 @@ class MariaDbPublisher {
         var result = []
         for (const row of rows) {
             let o = new FxRate(row.BaseCcy, row.QuoteCcy, row.Rate, row.ExchangeName)
-            o.at = moment.utc(row.Dt).toDate()
+            o.at = moment(row.Dt).utc(true).toDate()
             result.push(o)
         }
         return result
