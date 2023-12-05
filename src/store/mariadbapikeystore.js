@@ -22,7 +22,7 @@ class MariaDbApiKeyStore {
     toList(rows) {
         var result = []
         for (const row of rows) {
-            result.push({ apikey: row.ApiKey, name: row.ConsumerName, validuntil: row.ValidUntil })
+            result.push({ apikey: row.ApiKey, name: row.ConsumerName, validuntil: Utils.utcStringToDateTime(row.ValidUntil) })
         }
         return result
     }
