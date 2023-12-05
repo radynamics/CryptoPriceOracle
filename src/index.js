@@ -3,8 +3,6 @@ const express = require('express')
 const bodyParser = require('body-parser')
 require('dotenv').config()
 
-const JsonResponse = require('./jsonresponse');
-
 const SourceDefinitions = require('./provider/sourcedefinitions')
 const StoreFactory = require('./store/storefactory')
 const RateStorePublisher = require('./publisher/ratestorepublisher')
