@@ -12,9 +12,9 @@ function round(amt, digits) {
     return +(Math.round(amt + "e+" + digits) + "e-" + digits);
 }
 
-function toMariaDbDateTimeText(value) {
+function dateTimeToUtcString(value) {
     // Enforce format 'YYYY-MM-DD HH:MM:SS'
     return new Date(value.toISOString()).toJSON().slice(0, 19).replace('T', ' ')
 }
 
-module.exports = { utf8ToHex, hexToUtf8, round, toMariaDbDateTimeText }
+module.exports = { utf8ToHex, hexToUtf8, round, dateTimeToUtcString }

@@ -30,7 +30,7 @@ class MariaDbApiKeyStore {
         let conn
         try {
             conn = await this.pool.getConnection()
-            let validUntilText = Utils.toMariaDbDateTimeText(entry.validUntil)
+            let validUntilText = Utils.dateTimeToUtcString(entry.validUntil)
             const res = await conn.query("INSERT INTO apikey (ApiKey, ConsumerName, ValidUntil) VALUES (?, ?, ?)", [entry.apiKey, entry.name, validUntilText])
             if (res.affectedRows !== 1) {
                 throw new Error(`Inserting entry failed. ${JSON.stringify(entry)}`)

@@ -30,7 +30,7 @@ class PostgresDbApiKeyStore {
         let conn
         try {
             conn = await this.pool.connect()
-            let validUntilText = Utils.toMariaDbDateTimeText(entry.validUntil)
+            let validUntilText = Utils.dateTimeToUtcString(entry.validUntil)
             const res = await conn.query(`INSERT INTO apikey ("ApiKey", "ConsumerName", "ValidUntil") VALUES ($1, $2, $3)`, [entry.apiKey, entry.name, validUntilText])
             if (res.rowCount !== 1) {
                 throw new Error(`Inserting entry failed. ${JSON.stringify(entry)}`)

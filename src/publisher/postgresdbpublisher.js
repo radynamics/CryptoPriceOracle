@@ -24,7 +24,7 @@ class PostgresDbPublisher {
         let conn
         try {
             conn = await this.pool.connect()
-            let atText = Utils.toMariaDbDateTimeText(rate.at)
+            let atText = Utils.dateTimeToUtcString(rate.at)
             const exchangeId = ExchangeIdHelper.toId(rate.exchangeName)
             if (exchangeId === ExchangeIdHelper.unknown) {
                 console.warn(`Exchange ${rate.exchangeName} is unknown.`)
@@ -46,7 +46,7 @@ class PostgresDbPublisher {
         let conn
         try {
             conn = await this.pool.connect()
-            let beforeText = Utils.toMariaDbDateTimeText(before)
+            let beforeText = Utils.dateTimeToUtcString(before)
             await conn.query(`DELETE FROM rate WHERE "Dt" < $1`, [beforeText])
         } catch (err) {
             throw err
@@ -59,8 +59,8 @@ class PostgresDbPublisher {
         let conn
         try {
             conn = await this.pool.connect()
-            let startText = Utils.toMariaDbDateTimeText(start)
-            let endText = Utils.toMariaDbDateTimeText(end)
+            let startText = Utils.dateTimeToUtcString(start)
+            let endText = Utils.dateTimeToUtcString(end)
             const res = await conn.query(`SELECT * FROM rate WHERE "BaseCcy" = $1 AND "QuoteCcy" = $2 AND "Dt" BETWEEN $3 AND $4`, [baseCcy, quoteCcy, startText, endText])
             return this.toFxRateList(res.rows)
         } catch (err) {
