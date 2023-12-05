@@ -1,6 +1,6 @@
 'use strict'
 
-class MemoryExchangeStore {
+class ExchangeStore {
     constructor() {
         this.entries = []
     }
@@ -17,4 +17,4 @@ class MemoryExchangeStore {
     }
 }
 
-module.exports = MemoryExchangeStore
+module.exports = ExchangeStore

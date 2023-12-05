@@ -1,9 +1,8 @@
 'use strict'
-const mariadb = require('mariadb')
 
-class MariaDbExchangeStore {
-    constructor(dbInfo) {
-        this.pool = mariadb.createPool({ host: dbInfo.host, database: dbInfo.dbName, user: dbInfo.user, password: dbInfo.password, connectionLimit: 5 })
+class ExchangeStore {
+    constructor(pool) {
+        this.pool = pool
     }
 
     async insert(name) {
@@ -57,4 +56,4 @@ class MariaDbExchangeStore {
     }
 }
 
-module.exports = MariaDbExchangeStore
+module.exports = ExchangeStore

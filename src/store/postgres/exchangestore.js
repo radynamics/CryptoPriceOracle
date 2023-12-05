@@ -1,9 +1,8 @@
 'use strict'
-const pg = require('pg')
 
-class PostgresDbExchangeStore {
-    constructor(dbInfo) {
-        this.pool = new pg.Pool({ host: dbInfo.host, database: dbInfo.dbName, user: dbInfo.user, password: dbInfo.password })
+class ExchangeStore {
+    constructor(pool) {
+        this.pool = pool
     }
 
     async insert(name) {
@@ -57,4 +56,4 @@ class PostgresDbExchangeStore {
     }
 }
 
-module.exports = PostgresDbExchangeStore
+module.exports = ExchangeStore

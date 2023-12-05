@@ -1,10 +1,9 @@
 'use strict'
-const pg = require('pg')
-const Utils = require('../utils')
+const Utils = require('../../utils')
 
-class PostgresDbApiKeyStore {
-    constructor(dbInfo) {
-        this.pool = new pg.Pool({ host: dbInfo.host, database: dbInfo.dbName, user: dbInfo.user, password: dbInfo.password })
+class ApiKeyStore {
+    constructor(pool) {
+        this.pool = pool
     }
 
     async list() {
@@ -55,4 +54,4 @@ class PostgresDbApiKeyStore {
     }
 }
 
-module.exports = PostgresDbApiKeyStore
+module.exports = ApiKeyStore

@@ -9,16 +9,7 @@ const ExchangeRateSource = require('./exchangeratesource')
 const FxRate = require('./model/fxrate')
 const JsonResponse = require('./jsonresponse');
 
-const MemoryRateStore = require('./store/memoryratestore')
-const MemoryApiKeyStore = require('./store/memoryapikeystore')
-const MemoryExchangeStore = require('./store/memoryexchangestore')
-const MariaDbRateStore = require('./store/mariadbratestore')
-const MariaDbApiKeyStore = require('./store/mariadbapikeystore')
-const MariaDbExchangeStore = require('./store/mariadbexchangestore')
-const PostgresDbRateStore = require('./store/postgresdbratestore')
-const PostgresDbApiKeyStore = require('./store/postgresdbapikeystore')
-const PostgresDbExchangeStore = require('./store/postgresdbexchangestore')
-
+const StoreFactory = require('./store/storefactory')
 const RateStorePublisher = require('./publisher/ratestorepublisher')
 const XrplTrustlinePublisher = require('./publisher/xrpltrustlinepublisher')
 
@@ -56,11 +47,10 @@ for (const c of xrplTrustlinePublishConfig) {
 const dbInfo = process.env.DB_HOST === undefined || process.env.DB_NAME === undefined
     ? undefined
     : { host: process.env.DB_HOST, dbName: process.env.DB_NAME, user: process.env.DB_USER, password: process.env.DB_PASSWORD }
-const rateStore = createRateStore(dbInfo)
-const p = new RateStorePublisher(rateStore, createExchangeStore(dbInfo))
+const store = new StoreFactory(dbInfo).create(process.env.DB_PROVIDER)
+const p = new RateStorePublisher(store.getRateStore(), store.getExchangeStore())
 p.setMaxAgeSeconds(process.env.RATESTORE_MAXAGE_SECONDS === undefined ? RateStorePublisher.DefaultMaxAgeSeconds : parseInt(process.env.RATESTORE_MAXAGE_SECONDS))
 publishers.push(p)
-const apiKeyStore = createKeyStoreDbProvider(dbInfo)
 
 let sourceError = new Map()
 
@@ -68,8 +58,8 @@ app.get('/', (req, res) => {
     res.send('Service up and running ☕')
 })
 
-const apiKeyController = new ApiKeyController(apiKeyStore)
-const rateController = new RateController(rateStore)
+const apiKeyController = new ApiKeyController(store.getApiKeyStore())
+const rateController = new RateController(store.getRateStore())
 const router = express.Router();
 app.get('/rate/:id', apiKeyController.auth, (req, res) => { rateController.getRate(req, res) });
 app.get('/apikey', (req, res) => { verifyPwr(req, res) ? apiKeyController.list(req, res) : {} });
@@ -78,36 +68,6 @@ app.get('/health', getHealth)
 app.get('/status', (req, res) => { verifyPwr(req, res) ? getStatus(req, res) : {} })
 app.use('/', router)
 
-function createRateStore(dbInfo) {
-    if (dbInfo === undefined) {
-        return new MemoryRateStore()
-    }
-    switch (process.env.DB_PROVIDER) {
-        case 'mariadb': return new MariaDbRateStore(dbInfo)
-        case 'postgres': return new PostgresDbRateStore(dbInfo)
-        default: throw new Error(`env.DB_PROVIDER ${env.DB_PROVIDER} is unknown.`)
-    }
-}
-function createExchangeStore(dbInfo) {
-    if (dbInfo === undefined) {
-        return new MemoryExchangeStore()
-    }
-    switch (process.env.DB_PROVIDER) {
-        case 'mariadb': return new MariaDbExchangeStore(dbInfo)
-        case 'postgres': return new PostgresDbExchangeStore(dbInfo)
-        default: throw new Error(`env.DB_PROVIDER ${env.DB_PROVIDER} is unknown.`)
-    }
-}
-function createKeyStoreDbProvider(dbInfo) {
-    if (dbInfo === undefined) {
-        return new MemoryApiKeyStore()
-    }
-    switch (process.env.DB_PROVIDER) {
-        case 'mariadb': return new MariaDbApiKeyStore(dbInfo)
-        case 'postgres': return new PostgresDbApiKeyStore(dbInfo)
-        default: throw new Error(`env.DB_PROVIDER ${env.DB_PROVIDER} is unknown.`)
-    }
-}
 function loadProvider() {
     let files = getJsonFiles('./provider')
     for (const file of files) {
@@ -135,7 +95,7 @@ async function initStore() {
     if (dbInfo === undefined) {
         return
     }
-    const store = createRateStore(dbInfo)
+    const store = new StoreFactory(dbInfo).create(process.env.DB_PROVIDER)
     if (!await store.initialized()) {
         await store.initialize()
     }

@@ -1,10 +1,9 @@
 'use strict'
-const mariadb = require('mariadb')
-const Utils = require('../utils')
+const Utils = require('../../utils')
 
-class MariaDbApiKeyStore {
-    constructor(dbInfo) {
-        this.pool = mariadb.createPool({ host: dbInfo.host, database: dbInfo.dbName, user: dbInfo.user, password: dbInfo.password, connectionLimit: 5 })
+class ApiKeyStore {
+    constructor(pool) {
+        this.pool = pool
     }
 
     async list() {
@@ -55,4 +54,4 @@ class MariaDbApiKeyStore {
     }
 }
 
-module.exports = MariaDbApiKeyStore
+module.exports = ApiKeyStore

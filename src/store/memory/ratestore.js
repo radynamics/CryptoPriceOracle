@@ -1,6 +1,6 @@
 'use strict'
 
-class MemoryRateStore {
+class RateStore {
     constructor() {
         this.rates = new Map()
     }
@@ -36,13 +36,6 @@ class MemoryRateStore {
         }
         return count
     }
-
-    initialized() {
-        return true
-    }
-
-    initialize() {
-    }
 }
 
-module.exports = MemoryRateStore
+module.exports = RateStore

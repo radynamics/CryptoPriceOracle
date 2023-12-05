@@ -1,6 +1,6 @@
 'use strict'
 
-class MemoryApiKeyStore {
+class ApiKeyStore {
     constructor() {
         this.entries = []
     }
@@ -21,4 +21,4 @@ class MemoryApiKeyStore {
     }
 }
 
-module.exports = MemoryApiKeyStore
+module.exports = ApiKeyStore
