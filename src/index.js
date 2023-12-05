@@ -42,13 +42,14 @@ const started = new Date()
 let provider = []
 let publishers = []
 
-const publishCurrencies = process.env.XRPL_PUBLISH_CURRENCIES === undefined ? [] : process.env.XRPL_PUBLISH_CURRENCIES.split(',')
-if (publishCurrencies.length > 0) {
-    const p = new XrplTrustlinePublisher(process.env.XRPL_ENDPOINT, process.env.XRPL_ACCOUNT_PUBLICKEY, process.env.XRPL_ACCOUNT_SECRET, process.env.XRPL_ISSUER_PUBLICKEY);
-    p.setMaxFee(process.env.XRPL_MAX_FEE_DROPS === undefined ? XrplTrustlinePublisher.DefaultMaxFee : parseInt(process.env.XRPL_MAX_FEE_DROPS))
-    p.setPublishCurrencies(new Set(publishCurrencies))
+const xrplTrustlinePublishConfig = process.env.XRPL_TRUSTLINE_PUBLISH_CONFIG === undefined ? [] : JSON.parse(process.env.XRPL_TRUSTLINE_PUBLISH_CONFIG)
+for (const c of xrplTrustlinePublishConfig) {
+    const p = new XrplTrustlinePublisher(c.endpoint, c.accountPublicKey, c.accountSecret, c.issuerPublicKey)
+    p.setMaxFee(c.maxFeeDrops === undefined ? XrplTrustlinePublisher.DefaultMaxFee : parseInt(c.maxFeeDrops))
+    p.setPublishCurrencies(new Set(c.publishCurrencies === undefined ? [] : c.publishCurrencies))
     publishers.push(p)
 }
+
 const dbInfo = process.env.DB_HOST === undefined || process.env.DB_NAME === undefined
     ? undefined
     : { host: process.env.DB_HOST, dbName: process.env.DB_NAME, user: process.env.DB_USER, password: process.env.DB_PASSWORD }
