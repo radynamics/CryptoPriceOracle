@@ -1,7 +1,7 @@
 'use strict'
 const fs = require('fs')
 const moment = require('moment')
-const ExchangeRateSource = require('../exchangeratesource')
+const ExchangeRateSource = require('./exchangeratesource')
 const FxRate = require('../model/fxrate')
 
 class Sources {
