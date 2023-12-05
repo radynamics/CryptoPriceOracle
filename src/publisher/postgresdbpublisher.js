@@ -74,7 +74,7 @@ class PostgresDbPublisher {
         var result = []
         for (const row of rows) {
             let o = new FxRate(row.BaseCcy, row.QuoteCcy, row.Rate, row.ExchangeName)
-            o.at = moment(row.Dt).utc(true).toDate()
+            o.at = Utils.utcStringToDateTime(row.Dt)
             result.push(o)
         }
         return result
