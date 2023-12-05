@@ -5,7 +5,7 @@ require('dotenv').config()
 
 const JsonResponse = require('./jsonresponse');
 
-const Sources = require('./provider/sources')
+const SourceDefinitions = require('./provider/sourcedefinitions')
 const StoreFactory = require('./store/storefactory')
 const RateStorePublisher = require('./publisher/ratestorepublisher')
 const XrplTrustlinePublisher = require('./publisher/xrpltrustlinepublisher')
@@ -29,7 +29,7 @@ if (process.env.LOG_INFO !== 'true') {
 
 const started = new Date()
 
-const sources = new Sources(process.env.FETCH_CURRENCIES === undefined ? [] : process.env.FETCH_CURRENCIES.split(','))
+const sourceDefinitions = new SourceDefinitions(process.env.FETCH_CURRENCIES === undefined ? [] : process.env.FETCH_CURRENCIES.split(','))
 let publishers = []
 
 const xrplTrustlinePublishConfig = process.env.XRPL_TRUSTLINE_PUBLISH_CONFIG === undefined ? [] : JSON.parse(process.env.XRPL_TRUSTLINE_PUBLISH_CONFIG)
@@ -73,7 +73,7 @@ async function initStore() {
 }
 
 async function doWork() {
-    const result = await sources.fetchAll()
+    const result = await sourceDefinitions.fetchAll()
     if (result.length === 0) {
         return
     }
@@ -115,7 +115,7 @@ function verifyPwr(req, res) {
 
 app.listen(port, async () => {
     console.log(`Started, listening on port ${port}`)
-    sources.load()
+    sourceDefinitions.load()
     await initStore()
 
     setInterval(function () {

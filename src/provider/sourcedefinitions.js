@@ -4,7 +4,7 @@ const moment = require('moment')
 const ExchangeRateSource = require('./exchangeratesource')
 const FxRate = require('../model/fxrate')
 
-class Sources {
+class SourceDefinitions {
     constructor(fetchCcys) {
         this.fetchCcys = fetchCcys
         this.provider = []
@@ -100,4 +100,4 @@ class Sources {
     }
 }
 
-module.exports = Sources
+module.exports = SourceDefinitions
