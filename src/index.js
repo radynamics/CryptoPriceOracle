@@ -12,6 +12,7 @@ const XrplTrustlinePublisher = require('./publisher/xrpltrustlinepublisher')
 
 const RateController = require('./controller/ratecontroller');
 const ApiKeyController = require('./controller/apikeycontroller');
+const HealthController = require('./controller/healthcontroller')
 
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -19,7 +20,6 @@ app.use(bodyParser.json())
 
 const port = process.env.PORT || 3000
 const interval = process.env.PUBLISH_INTERVAL || 60000
-const unhealthyAfter = process.env.UNHEALTHY_AFTER === undefined ? 900000 : parseInt(process.env.UNHEALTHY_AFTER);
 const adminPwr = process.env.ADMINPWR
 if (adminPwr == null) throw new Error('env.ADMINPWR must be defined')
 
@@ -54,11 +54,12 @@ app.get('/', (req, res) => {
 
 const apiKeyController = new ApiKeyController(store.getApiKeyStore())
 const rateController = new RateController(store.getRateStore())
+const healthController = new HealthController(publishers, process.env.UNHEALTHY_AFTER === undefined ? 900000 : parseInt(process.env.UNHEALTHY_AFTER))
 const router = express.Router();
 app.get('/rate/:id', apiKeyController.auth, (req, res) => { rateController.getRate(req, res) });
 app.get('/apikey', (req, res) => { verifyPwr(req, res) ? apiKeyController.list(req, res) : {} });
 app.post('/apikey', (req, res) => { verifyPwr(req, res) ? apiKeyController.create(req, res) : {} });
-app.get('/health', getHealth)
+app.get('/health', (req, res) => { healthController.get(req, res) })
 app.get('/status', (req, res) => { verifyPwr(req, res) ? getStatus(req, res) : {} })
 app.use('/', router)
 
@@ -82,21 +83,6 @@ async function doWork() {
     }
 }
 
-async function getHealth(req, res) {
-    var stats = []
-    for (const publisher of publishers) {
-        const lastPublished = publisher.getLastPublished()
-        const healthy = lastPublished == null || lastPublished.getTime() + unhealthyAfter > new Date().getTime()
-        const lastPublishedText = lastPublished == null ? null : lastPublished.toISOString()
-        stats.push({ name: publisher.getName(), healthy: healthy, lastPublished: lastPublishedText })
-    }
-
-    if (stats.filter(e => !e.healthy).length > 0) {
-        res.status(500).send(stats)
-    } else {
-        res.status(200).send(null)
-    }
-}
 async function getStatus(req, res) {
     var stats = []
     for (const publisher of publishers) {
