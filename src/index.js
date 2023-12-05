@@ -13,6 +13,7 @@ const XrplTrustlinePublisher = require('./publisher/xrpltrustlinepublisher')
 const RateController = require('./controller/ratecontroller');
 const ApiKeyController = require('./controller/apikeycontroller');
 const HealthController = require('./controller/healthcontroller')
+const StatusController = require('./controller/statuscontroller')
 
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -26,8 +27,6 @@ if (adminPwr == null) throw new Error('env.ADMINPWR must be defined')
 if (process.env.LOG_INFO !== 'true') {
     console.info = function () { };
 }
-
-const started = new Date()
 
 const sourceDefinitions = new SourceDefinitions(process.env.FETCH_CURRENCIES === undefined ? [] : process.env.FETCH_CURRENCIES.split(','))
 let publishers = []
@@ -55,12 +54,14 @@ app.get('/', (req, res) => {
 const apiKeyController = new ApiKeyController(store.getApiKeyStore())
 const rateController = new RateController(store.getRateStore())
 const healthController = new HealthController(publishers, process.env.UNHEALTHY_AFTER === undefined ? 900000 : parseInt(process.env.UNHEALTHY_AFTER))
+const statusController = new StatusController(publishers, new Date())
+
 const router = express.Router();
 app.get('/rate/:id', apiKeyController.auth, (req, res) => { rateController.getRate(req, res) });
 app.get('/apikey', (req, res) => { verifyPwr(req, res) ? apiKeyController.list(req, res) : {} });
 app.post('/apikey', (req, res) => { verifyPwr(req, res) ? apiKeyController.create(req, res) : {} });
 app.get('/health', (req, res) => { healthController.get(req, res) })
-app.get('/status', (req, res) => { verifyPwr(req, res) ? getStatus(req, res) : {} })
+app.get('/status', (req, res) => { verifyPwr(req, res) ? statusController.get(req, res) : {} })
 app.use('/', router)
 
 async function initStore() {
@@ -83,14 +84,6 @@ async function doWork() {
     }
 }
 
-async function getStatus(req, res) {
-    var stats = []
-    for (const publisher of publishers) {
-        stats.push({ name: publisher.getName(), lastPublished: publisher.getLastPublished(), store: await publisher.getStatus() })
-    }
-
-    JsonResponse.ok(res, { started: started.toISOString(), publisher: stats })
-}
 function verifyPwr(req, res) {
     if (req.query.pwr !== adminPwr) {
         JsonResponse.error(res, 'invalid password')
