@@ -51,7 +51,7 @@ class RateStorePublisher {
     }
 
     async getStatus() {
-        return { lastPublished: this.getLastPublished(), size: new String(await this.size()) }
+        return { name: this.store.constructor.name, size: new String(await this.size()) }
     }
 
     async anyTablePresent() {

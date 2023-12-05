@@ -192,7 +192,6 @@ class XrplTrustlinePublisher {
 
     async getStatus() {
         return {
-            lastPublished: this.getLastPublished(),
             queueSize: this.queueSize(),
             lastFee: this.lastFee,
             submissionsSinceStart: this.submissionsSinceStart,

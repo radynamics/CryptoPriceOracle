@@ -219,7 +219,7 @@ async function getStatus(req, res) {
     if (!verifyPwr(req, res)) return
     var stats = []
     for (const publisher of publishers) {
-        stats.push({ name: publisher.getName(), status: await publisher.getStatus() })
+        stats.push({ name: publisher.getName(), lastPublished: publisher.getLastPublished(), store: await publisher.getStatus() })
     }
 
     JsonResponse.ok(res, { started: started.toISOString(), publisher: stats })
