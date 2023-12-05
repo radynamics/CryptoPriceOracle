@@ -102,8 +102,7 @@ class PostgresDbRateStore {
                     "Dt" timestamp without time zone NOT NULL,
                     PRIMARY KEY ("RateId")
                 );
-                CREATE INDEX ON rate USING btree ("BaseCcy" ASC NULLS LAST, "QuoteCcy" ASC NULLS LAST, "Dt" ASC NULLS LAST) WITH (deduplicate_items=True);
-                ALTER TABLE IF EXISTS rate OWNER to ${this.dbInfo.user};`
+                CREATE INDEX ON rate USING btree ("BaseCcy" ASC NULLS LAST, "QuoteCcy" ASC NULLS LAST, "Dt" ASC NULLS LAST) WITH (deduplicate_items=True);`
                 await conn.query(sql)
             }
             {
@@ -114,8 +113,7 @@ class PostgresDbRateStore {
                     "ValidUntil" timestamp without time zone NOT NULL,
                     PRIMARY KEY ("ApiKeyId"),
                     CONSTRAINT "ApiKey_UNIQUE" UNIQUE ("ApiKey")
-                );
-                ALTER TABLE IF EXISTS apikey OWNER to ${this.dbInfo.user};`
+                );`
                 await conn.query(sql)
             }
         } catch (err) {
