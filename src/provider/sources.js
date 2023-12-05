@@ -12,7 +12,7 @@ class Sources {
     }
 
     load() {
-        let files = this.getJsonFiles('./provider')
+        let files = this.getJsonFiles('./provider/definitions')
         for (const file of files) {
             const data = fs.readFileSync(file)
             const content = JSON.parse(data.toString())
