@@ -1,12 +1,12 @@
 {
   "name": "cryptopriceoracle",
-  "version": "0.0.1",
+  "version": "0.5.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "radynamics Reto Steimen",
+  "author": "radynamics",
   "dependencies": {
     "axios": "^1.6.2",
     "body-parser": "^1.20.2",
