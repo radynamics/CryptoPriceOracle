@@ -215,6 +215,7 @@ class XrplTrustlinePublisher {
         return {
             endpoint: this.endpoint,
             queueSize: this.queueSize(),
+            maxFee: this.maxFee,
             lastFee: this.lastFee,
             submissionsSinceStart: this.submissionsSinceStart,
             accountBalance: await this.getAccountBalance(),
