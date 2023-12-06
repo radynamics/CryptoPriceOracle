@@ -1,5 +1,6 @@
 'use strict'
 const xrpl = require("xrpl")
+const HooksFee = require('./hooksfee')
 const moment = require('moment');
 const RateController = require('../controller/ratecontroller');
 const Utils = require('../utils')
@@ -19,6 +20,7 @@ class XrplTrustlinePublisher {
         this.lastError = null
         this.lastErrorOccured = null
         this.publishCurrencies = new Set()
+        this.feeProviderId = undefined
     }
 
     publishAll(rates) {
@@ -92,6 +94,7 @@ class XrplTrustlinePublisher {
         try {
             const accountWallet = xrpl.Wallet.fromSeed(this.accountSecret)
             const prepared = await client.autofill(tx)
+            prepared.Fee = await this.estimateFee(client, prepared)
             this.lastFee = new Number(prepared.Fee)
             if (new Number(prepared.Fee) > this.maxFee) {
                 console.warn(`Submitting ${tx.LimitAmount.currency} failed. Fee ${prepared.Fee} is over max ${this.maxFee}.`)
@@ -120,6 +123,20 @@ class XrplTrustlinePublisher {
             console.error(tx)
             this.logError(e)
         }
+    }
+
+    async estimateFee(client, tx) {
+        if (this.feeProviderId === undefined) {
+            return tx.Fee
+        }
+
+        let provider
+        switch (this.feeProviderId) {
+            case 'hooksFee': provider = new HooksFee(client); break
+            default: throw new Error(`Unknown feeProviderId ${this.feeProviderId}`)
+        }
+
+        return await provider.get(tx)
     }
 
     getXrplCurrency(ccy) {
@@ -188,6 +205,10 @@ class XrplTrustlinePublisher {
 
     getLastPublished() {
         return this.lastPublished
+    }
+
+    setFeeProviderId(value) {
+        this.feeProviderId = value
     }
 
     async getStatus() {

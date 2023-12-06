@@ -34,6 +34,7 @@ for (const c of xrplTrustlinePublishConfig) {
     const p = new XrplTrustlinePublisher(c.endpoint, c.accountPublicKey, c.accountSecret, c.issuerPublicKey)
     p.setMaxFee(c.maxFeeDrops === undefined ? XrplTrustlinePublisher.DefaultMaxFee : parseInt(c.maxFeeDrops))
     p.setPublishCurrencies(new Set(c.publishCurrencies === undefined ? [] : c.publishCurrencies))
+    p.setFeeProviderId(c.feeProvider)
     publishers.push(p)
 }
 
