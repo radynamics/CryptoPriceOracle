@@ -200,7 +200,7 @@ class XrplTrustlinePublisher {
     }
 
     getName() {
-        return "XrplTrustlinePublisher"
+        return "xrplTrustlinePublisher"
     }
 
     getLastPublished() {

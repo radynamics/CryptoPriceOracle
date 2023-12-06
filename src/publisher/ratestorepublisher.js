@@ -40,7 +40,7 @@ class RateStorePublisher {
     }
 
     getName() {
-        return "RateStorePublisher"
+        return "rateStorePublisher"
     }
 
     getLastPublished() {
