@@ -1,6 +1,7 @@
 'use strict'
 
 class RateStore {
+    static DefaultMaxAgeSeconds = 60 * 60 * 2 * 1
     constructor() {
         this.rates = new Map()
     }

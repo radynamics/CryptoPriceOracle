@@ -5,6 +5,7 @@ require('dotenv').config()
 
 const SourceDefinitions = require('./provider/sourcedefinitions')
 const StoreFactory = require('./store/storefactory')
+const MemoryRateStore = require('./store/memory/ratestore')
 const RateStorePublisher = require('./publisher/ratestorepublisher')
 const XrplTrustlinePublisher = require('./publisher/xrpltrustlinepublisher')
 
@@ -43,7 +44,11 @@ const dbInfo = process.env.DB_HOST === undefined || process.env.DB_NAME === unde
     : { host: process.env.DB_HOST, dbName: process.env.DB_NAME, user: process.env.DB_USER, password: process.env.DB_PASSWORD }
 const store = new StoreFactory(dbInfo).create(process.env.DB_PROVIDER)
 const p = new RateStorePublisher(store)
-p.setMaxAgeSeconds(process.env.RATESTORE_MAXAGE_SECONDS === undefined ? RateStorePublisher.DefaultMaxAgeSeconds : parseInt(process.env.RATESTORE_MAXAGE_SECONDS))
+let rateStoreMaxAge = dbInfo === undefined ? MemoryRateStore.DefaultMaxAgeSeconds : RateStorePublisher.DefaultMaxAgeSeconds
+if (process.env.RATESTORE_MAXAGE_SECONDS !== undefined) {
+    rateStoreMaxAge = parseInt(process.env.RATESTORE_MAXAGE_SECONDS)
+}
+p.setMaxAgeSeconds(rateStoreMaxAge)
 publishers.push(p)
 
 const apiKeyController = new ApiKeyController(store.getApiKeyStore(), adminPwr)
