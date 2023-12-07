@@ -12,7 +12,7 @@ Don't trust. Verify. Run your own instance to ensure you're getting the expected
 | url                 | description                                                                        | examples                          |
 |---------------------|------------------------------------------------------------------------------------|-----------------------------------|
 | GET  /rate/:id?quote=USD | Get latest quote for currency pair                                                 | /rate/XRP?quote=USD (x-api-key required) |
-| GET  /rate/:id?quote=USD&at=YYYY-MM-DDTHHmmssZ | Get quote for currency pair at a point in (UTC) time         | /rate/XRP?quote=USD&at=2023-12-05T17:37:23Z (x-api-key required) |
+| GET  /rate/:id?quote=USD&at=YYYYMMDDTHHmmssZ   | Get quote for currency pair at a point in (UTC) time         | /rate/XRP?quote=USD&at=20231207T073723Z (x-api-key required) |
 | GET  /apikey             | List all api keys                                                                  | /apikey?pwr=env.ADMINPWR     |
 | POST /apikey             | Create new api key for URL encoded form data 'name'                                | /apikey?pwr=env.ADMINPWR     |
 | GET  /health             | HTTP 200 if good or HTTP 500 with details                                          | /health?pwr=env.ADMINPWR     |
