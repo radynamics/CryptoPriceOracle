@@ -1,5 +1,5 @@
 # CryptoPriceOracle
-Fetches exchange rates for currency pairs (eg. XRP/USD, BTC/EUR) from various sources. Data can be store in memory, MariaDB or PostgreSQL. For XRPL it's additionally possible to store exchange rates on-chain using an XRPL TrustSet command.
+Fetches exchange rates for currency pairs (eg. XRP/USD, BTC/EUR) from various sources. Data can be stored in memory, MariaDB or PostgreSQL. For XRPL it's additionally possible to store exchange rates on-chain using an XRPL TrustSet command.
 
 If stored in memory or a database, this service offers a REST API to fetch persisted data. API calls are protected using <code>env.ADMINPWR</code> and <code>x-api-key</code> HTTP header.
 
