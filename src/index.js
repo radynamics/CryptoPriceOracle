@@ -61,12 +61,16 @@ app.use('/', router)
 app.get('/', (req, res) => { res.send('Service up and running ☕') })
 
 async function doWork() {
-    const result = await sourceDefinitions.fetchAll()
-    if (result.length === 0) {
-        return
-    }
-    for (const publisher of publishers) {
-        await publisher.publishAll(result)
+    try {
+        const result = await sourceDefinitions.fetchAll()
+        if (result.length === 0) {
+            return
+        }
+        for (const publisher of publishers) {
+            await publisher.publishAll(result)
+        }
+    } catch (e) {
+        console.error(e)
     }
 }
 
