@@ -21,20 +21,20 @@ Don't trust. Verify. Run your own instance to ensure you're getting the expected
 ## Config
 Exchange rate sources are defined in ./provider/definitions with one json file per base currency.
 
-| .env variable                 | values (<default>)        | description                                                                        |
+| .env variable                 | values (\<default>)        | description                                                                        |
 |-------------------------------|---------------------------|------------------------------------------------------------------------------------|
 | PORT                          | <3000>                    | HTTP port for service                                                              |
 | TIMEOUT_SECONDS               | <15>                      | Timeout seconds for exchange rate source timeout                                   |
-| LOG_INFO                      | <false>                   | True if infos should be printed to console                                            |
+| LOG_INFO                      | \<false>                   | True if infos should be printed to console                                            |
 | UNHEALTHY_AFTER               | <900000>                  | Millis without any new exchange rates until service returns   HTTP 500 at /health                                 |
 | ADMINPWR                      |                           | Password to administrative calls                                                   |
 | FETCH_CURRENCIES              | [XRP,XAH], <[]>           | A list of baseCurrencies to be fetched. [] or obmitted is considered all                       |
 | PUBLISH_INTERVAL              | <60000>                   | Fetch & publish trigger interval in millis                                         |
-| DB_PROVIDER                   | mariadb, postgres, <>     | Storage provider or null, for memory storage only                                  |
-| DB_HOST                       | <>                        | Database (db) server name                                                          |
-| DB_NAME                       | <>                        | Database name                                                                      |
-| DB_USER                       | <>                        | Database user                                                                      |
-| DB_PASSWORD                   | <>                        | Database password                                                                  |
+| DB_PROVIDER                   | mariadb, postgres     | Storage provider or null, for memory storage only                                  |
+| DB_HOST                       |                           | Database (db) server name                                                          |
+| DB_NAME                       |                           | Database name                                                                      |
+| DB_USER                       |                           | Database user                                                                      |
+| DB_PASSWORD                   |                           | Database password                                                                  |
 | RATESTORE_MAXAGE_SECONDS      | <5184000>, <7200>         | Maximum age to keep in storage before removal (2 month for db, 2 hours for memory) |
 | XRPL_TRUSTLINE_PUBLISH_CONFIG | <>                        | JSON config string for XRPL on-chain storage or omitted if not used                       |
 
