@@ -4,9 +4,6 @@
 name: Deploy Azure - CryptoPriceOracle-stage
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
