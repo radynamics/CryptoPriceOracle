@@ -39,7 +39,7 @@ for (const c of xrplTrustlinePublishConfig) {
     publishers.push(p)
 }
 
-const dbInfo = process.env.DB_HOST === undefined || process.env.DB_NAME === undefined
+const dbInfo = process.env.DB_PROVIDER === undefined || process.env.DB_HOST === undefined || process.env.DB_NAME === undefined
     ? undefined
     : { host: process.env.DB_HOST, dbName: process.env.DB_NAME, user: process.env.DB_USER, password: process.env.DB_PASSWORD }
 const store = new StoreFactory(dbInfo).create(process.env.DB_PROVIDER)
