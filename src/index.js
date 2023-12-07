@@ -52,6 +52,7 @@ p.setMaxAgeSeconds(rateStoreMaxAge)
 publishers.push(p)
 
 const apiKeyController = new ApiKeyController(store.getApiKeyStore(), adminPwr)
+apiKeyController.setAdditionalKeys(process.env.APIKEYS === undefined ? [] : process.env.APIKEYS.split(','))
 const rateController = new RateController(store.getRateStore())
 const healthController = new HealthController(publishers, process.env.UNHEALTHY_AFTER === undefined ? 900000 : parseInt(process.env.UNHEALTHY_AFTER))
 const statusController = new StatusController(publishers, new Date())

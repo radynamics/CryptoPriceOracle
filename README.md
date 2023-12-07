@@ -28,6 +28,7 @@ Exchange rate sources are defined in ./provider/definitions with one json file p
 | LOG_INFO                      | \<false>                   | True if infos should be printed to console                                            |
 | UNHEALTHY_AFTER               | <900000>                  | Millis without any new exchange rates until service returns   HTTP 500 at /health                                 |
 | ADMINPWR                      |                           | Password for administrative calls                                                  |
+| APIKEYS                       |                           | Comma separated list of additional valid api keys                                  |
 | FETCH_CURRENCIES              | [XRP,XAH], <[]>           | A list of baseCurrencies to be fetched. [] or obmitted is considered all                       |
 | PUBLISH_INTERVAL              | <60000>                   | Fetch & publish trigger interval in millis                                         |
 | DB_PROVIDER                   | mariadb, postgres     | Storage provider or null, for memory storage only                                  |

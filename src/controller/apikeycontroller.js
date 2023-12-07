@@ -8,10 +8,15 @@ class ApiKeyController {
         this.adminPwr = adminPwr
         this.auth = this.auth.bind(this)
         this.authAdminPwr = this.authAdminPwr.bind(this)
+        this.additionalKeys = []
     }
 
     async list(req, res) {
-        JsonResponse.ok(res, await this.store.list())
+        let list = await this.store.list()
+        for (var apiKey of this.additionalKeys) {
+            list.push(this.createEntry(apiKey, "predefined"))
+        }
+        JsonResponse.ok(res, list)
     }
 
     async create(req, res) {
@@ -20,9 +25,13 @@ class ApiKeyController {
             return;
         }
         const apiKey = crypto.randomUUID().replaceAll('-', '')
-        const entry = { apiKey: apiKey, name: req.body.name, validUntil: new Date('9999-12-31T23:59:59Z') }
+        const entry = this.createEntry(apiKey, req.body.name)
         await this.store.insert(entry)
         JsonResponse.ok(res, entry)
+    }
+
+    createEntry(apiKey, name) {
+        return { apiKey: apiKey, name: name, validUntil: new Date('9999-12-31T23:59:59Z') }
     }
 
     async authAdminPwr(req, res, next) {
@@ -46,7 +55,14 @@ class ApiKeyController {
         if (apiKey === undefined || apiKey.length === 0) {
             return false
         }
+        if (this.additionalKeys.includes(apiKey)) {
+            return true
+        }
         return (await this.store.get(apiKey)) !== null
+    }
+
+    setAdditionalKeys(values) {
+        this.additionalKeys = values
     }
 }
 
