@@ -37,7 +37,7 @@ Exchange rate sources are defined in ./provider/definitions with one json file p
 | DB_USER                       |                           | Database user                                                                      |
 | DB_PASSWORD                   |                           | Database password                                                                  |
 | RATESTORE_MAXAGE_SECONDS      | <5184000>, <7200>         | Maximum age to keep in storage before removal (2 month for db, 2 hours for memory) |
-| XRPL_TRUSTLINE_PUBLISH_CONFIG | <>                        | JSON config string for XRPL on-chain storage or omitted if not used                       |
+| XRPL_TRUSTLINE_PUBLISH_CONFIG |                           | JSON config string for XRPL on-chain storage or omitted if not used                       |
 
 ### XRPL_TRUSTLINE_PUBLISH_CONFIG
 A JSON array defining how and which exchange rates should be stored on-chain.
