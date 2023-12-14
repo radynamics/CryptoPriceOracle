@@ -58,6 +58,240 @@
                     "invert": false
                 }
             ]
+        },
+        {
+            "symbol": "JPY",
+            "sources": [
+                {
+                    "name": "coincheck",
+                    "url": "https://coincheck.com/api/ticker?pair=btc_jpy",
+                    "selector": "data.last",
+                    "invert": false
+                },
+                {
+                    "name": "btcbox",
+                    "url": "https://www.btcbox.co.jp/api/v1/tickers",
+                    "selector": "data.BTC_JPY.last",
+                    "invert": false
+                },
+                {
+                    "name": "zaif",
+                    "url": "https://api.zaif.jp/api/1/last_price/btc_jpy",
+                    "selector": "data.last_price",
+                    "invert": false
+                }
+            ]
+        },
+        {
+            "symbol": "KRW",
+            "sources": [
+                {
+                    "name": "upbit",
+                    "url": "https://api.upbit.com/v1/ticker?markets=KRW-BTC",
+                    "selector": "data[0].trade_price",
+                    "invert": false
+                },
+                {
+                    "name": "coinone",
+                    "url": "https://api.coinone.co.kr/ticker/?currency=BTC",
+                    "selector": "data.last",
+                    "invert": false
+                }
+            ]
+        },
+        {
+            "symbol": "TRY",
+            "sources": [
+                {
+                    "name": "paribu",
+                    "url": "https://www.paribu.com/ticker",
+                    "selector": "data.BTC_TL.last",
+                    "invert": false
+                },
+                {
+                    "name": "bitexen",
+                    "url": "https://www.bitexen.com/api/v1/ticker/BTCTRY/",
+                    "selector": "data.data.ticker.last_price",
+                    "invert": false
+                },
+                {
+                    "name": "cointr",
+                    "url": "https://api.cointr.pro/v1/spot/market/tickers?instId=BTCTRY",
+                    "selector": "data.data[0].lastPx",
+                    "invert": false
+                }
+            ]
+        },
+        {
+            "symbol": "GBP",
+            "sources": [
+                {
+                    "name": "bitstamp",
+                    "url": "https://www.bitstamp.net/api/v2/ticker/btcgbp/",
+                    "selector": "data.last",
+                    "invert": false
+                },
+                {
+                    "name": "kraken",
+                    "url": "https://api.kraken.com/0/public/Ticker?pair=BTCGBP",
+                    "selector": "data.result.XXBTZGBP.c[0]",
+                    "invert": false
+                },
+                {
+                    "name": "gemini",
+                    "url": "https://api.gemini.com/v2/ticker/BTCUSD",
+                    "selector": "data.bid",
+                    "invert": false
+                }
+            ]
+        },
+        {
+            "symbol": "THB",
+            "sources": [
+                {
+                    "name": "bitkub",
+                    "url": "https://api.bitkub.com/api/market/ticker?sym=THB_BTC",
+                    "selector": "data.THB_BTC.last",
+                    "invert": false
+                },
+                {
+                    "name": "coingecko",
+                    "url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=thb&precision=6",
+                    "selector": "data.bitcoin.thb",
+                    "invert": false
+                }
+            ]
+        },
+        {
+            "symbol": "BRL",
+            "sources": [
+                {
+                    "name": "bitso",
+                    "url": "https://api.bitso.com/v3/ticker/?book=btc_brl",
+                    "selector": "data.payload.last",
+                    "invert": false
+                },
+                {
+                    "name": "mercadobitcoin",
+                    "url": "https://www.mercadobitcoin.net/api/BTC/ticker/",
+                    "selector": "data.ticker.last",
+                    "invert": false
+                },
+                {
+                    "name": "novadax",
+                    "url": "https://api.novadax.com/v1/market/ticker?symbol=BTC_BRL",
+                    "selector": "data.data.lastPrice",
+                    "invert": false
+                }
+            ]
+        },
+        {
+            "symbol": "AUD",
+            "sources": [
+                {
+                    "name": "btcmarkets",
+                    "url": "https://api.btcmarkets.net/v3/markets/BTC-AUD/ticker",
+                    "selector": "data.lastPrice",
+                    "invert": false
+                },
+                {
+                    "name": "coinjar",
+                    "url": "https://data.exchange.coinjar.com/products/BTCAUD/ticker",
+                    "selector": "data.last",
+                    "invert": false
+                },
+                {
+                    "name": "independent-reserve",
+                    "url": "https://api.independentreserve.com/Public/GetMarketSummary?primaryCurrencyCode=btc&secondaryCurrencyCode=aud",
+                    "selector": "data.LastPrice",
+                    "invert": false
+                }
+            ]
+        },
+        {
+            "symbol": "MXN",
+            "sources": [
+                {
+                    "name": "bitso",
+                    "url": "https://api.bitso.com/v3/ticker/?book=btc_mxn",
+                    "selector": "data.payload.last",
+                    "invert": false
+                }
+            ]
+        },
+        {
+            "symbol": "ZAR",
+            "sources": [
+                {
+                    "name": "luno",
+                    "url": "https://api.luno.com/api/1/ticker?pair=XBTZAR",
+                    "selector": "data.last_trade",
+                    "invert": false
+                },
+                {
+                    "name": "valr",
+                    "url": "https://api.valr.com/v1/public/BTCZAR/marketsummary",
+                    "selector": "data.lastTradedPrice",
+                    "invert": false
+                },
+                {
+                    "name": "altcointrader",
+                    "url": "https://api.altcointrader.co.za/v3/live-stats",
+                    "selector": "data.BTC.Price",
+                    "invert": false
+                }
+            ]
+        },
+        {
+            "symbol": "IDR",
+            "sources": [
+                {
+                    "name": "tokocrypto",
+                    "url": "https://www.tokocrypto.com/open/v1/market/depth?symbol=BTC_IDR",
+                    "selector": "data.data.bids[0][0]",
+                    "invert": false
+                },
+                {
+                    "name": "indodax",
+                    "url": "https://indodax.com/api/ticker/btcidr",
+                    "selector": "data.ticker.last",
+                    "invert": false
+                }
+            ]
+        },
+        {
+            "symbol": "SGD",
+            "sources": [
+                {
+                    "name": "tokenize-exchange",
+                    "url": "https://api2.tokenize.exchange/public/v1/market/ticker?market=SGD-BTC",
+                    "selector": "data.data.lastPrice",
+                    "invert": false
+                },
+                {
+                    "name": "gemini",
+                    "url": "https://api.gemini.com/v2/ticker/BTCSGD",
+                    "selector": "data.bid",
+                    "invert": false
+                }
+            ]
+        },
+        {
+            "symbol": "CHF",
+            "sources": [
+                {
+                    "name": "coinbase",
+                    "url": "https://api.coinbase.com/v2/exchange-rates?currency=BTC",
+                    "selector": "data.data.rates.CHF",
+                    "invert": false
+                },
+                {
+                    "name": "coingecko",
+                    "url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=CHF&precision=10",
+                    "selector": "data.bitcoin.chf",
+                    "invert": false
+                }
+            ]
         }
     ]
 }
