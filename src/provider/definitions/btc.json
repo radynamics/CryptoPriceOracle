@@ -34,12 +34,6 @@
                     "invert": false
                 },
                 {
-                    "name": "binance",
-                    "url": "https://api.binance.com/api/v3/ticker/price?symbol=BTCEUR",
-                    "selector": "data.price",
-                    "invert": false
-                },
-                {
                     "name": "kraken",
                     "url": "https://api.kraken.com/0/public/Ticker?pair=BTCEUR",
                     "selector": "data.result.XXBTZEUR.c[0]",

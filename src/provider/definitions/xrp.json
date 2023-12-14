@@ -52,12 +52,6 @@
                     "invert": false
                 },
                 {
-                    "name": "binance",
-                    "url": "https://api.binance.com/api/v3/ticker/price?symbol=XRPEUR",
-                    "selector": "data.price",
-                    "invert": false
-                },
-                {
                     "name": "kraken",
                     "url": "https://api.kraken.com/0/public/Ticker?pair=XRPEUR",
                     "selector": "data.result.XXRPZEUR.c[0]",
@@ -127,9 +121,9 @@
             "symbol": "TRY",
             "sources": [
                 {
-                    "name": "binance",
-                    "url": "https://api.binance.com/api/v3/ticker/price?symbol=XRPTRY",
-                    "selector": "data.price",
+                    "name": "cointr",
+                    "url": "https://api.cointr.pro/v1/spot/market/tickers?instId=BTCTRY",
+                    "selector": "data.data[0].lastPx",
                     "invert": false
                 },
                 {
@@ -143,12 +137,6 @@
         {
             "symbol": "GBP",
             "sources": [
-                {
-                    "name": "binance",
-                    "url": "https://api.binance.com/api/v3/ticker/price?symbol=XRPGBP",
-                    "selector": "data.price",
-                    "invert": false
-                },
                 {
                     "name": "bitstamp",
                     "url": "https://www.bitstamp.net/api/v2/ticker/xrpgbp/",
@@ -190,12 +178,6 @@
             "symbol": "RUB",
             "sources": [
                 {
-                    "name": "binance",
-                    "url": "https://api.binance.com/api/v3/ticker/price?symbol=XRPRUB",
-                    "selector": "data.price",
-                    "invert": false
-                },
-                {
                     "name": "bithash",
                     "url": "https://www.bithash.net/api/v4/ticker",
                     "selector": "data.XRP_RUB.last_price",
@@ -207,9 +189,9 @@
             "symbol": "BRL",
             "sources": [
                 {
-                    "name": "binance",
-                    "url": "https://api.binance.com/api/v3/ticker/price?symbol=XRPBRL",
-                    "selector": "data.price",
+                    "name": "bitso",
+                    "url": "https://api.bitso.com/v3/ticker/?book=xrp_brl",
+                    "selector": "data.payload.last",
                     "invert": false
                 },
                 {
@@ -230,9 +212,9 @@
             "symbol": "AUD",
             "sources": [
                 {
-                    "name": "binance",
-                    "url": "https://api.binance.com/api/v3/ticker/price?symbol=XRPAUD",
-                    "selector": "data.price",
+                    "name": "btcmarkets",
+                    "url": "https://api.btcmarkets.net/v3/markets/XRP-AUD/ticker",
+                    "selector": "data.lastPrice",
                     "invert": false
                 },
                 {
