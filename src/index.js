@@ -67,16 +67,23 @@ app.use('/', router)
 app.get('/', (req, res) => { res.send('Service up and running ☕') })
 
 async function doWork() {
+    let result = []
     try {
-        const result = await sourceDefinitions.fetchAll()
-        if (result.length === 0) {
-            return
-        }
-        for (const publisher of publishers) {
-            await publisher.publishAll(result)
-        }
+        result = await sourceDefinitions.fetchAll()
     } catch (e) {
         console.error(e)
+    }
+
+    if (result.length === 0) {
+        return
+    }
+
+    for (const publisher of publishers) {
+        try {
+            await publisher.publishAll(result)
+        } catch (e) {
+            console.error(e)
+        }
     }
 }
 
