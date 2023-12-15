@@ -111,7 +111,7 @@ class XrplTrustlinePublisher {
                         console.warn(`Submitting ${tx.LimitAmount.currency} failed. ${result.result.engine_result}`)
                         return
                     }
-                    console.info(`Published ${tx.LimitAmount.currency} to XRPL`)
+                    console.info(`Published ${tx.LimitAmount.currency} to XRPL (${this.endpoint})`)
                     this.lastPublished = new Date()
                     this.submissionsSinceStart++
                 })
