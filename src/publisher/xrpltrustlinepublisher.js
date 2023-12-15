@@ -23,7 +23,7 @@ class XrplTrustlinePublisher {
         this.feeProviderId = undefined
     }
 
-    publishAll(rates) {
+    async publishAll(rates) {
         // Ensure all rates at the same time get processed together.
         const key = this.createKey(new Date())
         for (const rate of rates) {
@@ -31,7 +31,7 @@ class XrplTrustlinePublisher {
                 this.queue(key, rate)
             }
         }
-        this.processQueue()
+        await this.processQueue()
         console.info(`Queue size ${this.queueSize()}`)
     }
     queue(key, rate) {
