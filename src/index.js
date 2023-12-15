@@ -1,5 +1,6 @@
 'use strict'
 const express = require('express')
+const setRateLimit = require('express-rate-limit')
 const bodyParser = require('body-parser')
 require('dotenv').config()
 
@@ -57,8 +58,14 @@ const rateController = new RateController(store.getRateStore())
 const healthController = new HealthController(publishers, process.env.UNHEALTHY_AFTER === undefined ? 900000 : parseInt(process.env.UNHEALTHY_AFTER))
 const statusController = new StatusController(publishers, new Date())
 
+const rateLimitMiddleware = setRateLimit({
+    windowMs: process.env.RATELIMIT_WINDOW_MS || 60 * 1000,
+    max: process.env.RATELIMIT_MAX || 60,
+    headers: true,
+})
+
 const router = express.Router();
-app.get('/rate/:id', apiKeyController.auth, (req, res) => { rateController.getRate(req, res) });
+app.get('/rate/:id', rateLimitMiddleware, apiKeyController.auth, (req, res) => { rateController.getRate(req, res) });
 app.get('/apikey', apiKeyController.authAdminPwr, (req, res) => { apiKeyController.list(req, res) });
 app.post('/apikey', apiKeyController.authAdminPwr, (req, res) => { apiKeyController.create(req, res) });
 app.get('/health', (req, res) => { healthController.get(req, res) })

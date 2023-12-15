@@ -31,6 +31,8 @@ Exchange rate sources are defined in ./provider/definitions with one json file p
 | APIKEYS                       |                           | Comma separated list of additional valid api keys                                  |
 | FETCH_CURRENCIES              | [XRP,XAH], <[]>           | Comma separated list of baseCurrencies to be fetched. [] or obmitted is considered all |
 | PUBLISH_INTERVAL              | <60000>                   | Fetch & publish trigger interval in millis                                         |
+| RATELIMIT_WINDOW_MS           | <60000>                   | API rate limit time window  in millis                                              |
+| RATELIMIT_MAX                 | <60>                      | API rate limit max calls in time window                                            |
 | DB_PROVIDER                   | mariadb, postgres     | Storage provider or null, for memory storage only                                  |
 | DB_HOST                       |                           | Database (db) server name                                                          |
 | DB_NAME                       |                           | Database name                                                                      |
