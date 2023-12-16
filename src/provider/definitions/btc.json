@@ -240,9 +240,9 @@
             "symbol": "IDR",
             "sources": [
                 {
-                    "name": "tokocrypto",
-                    "url": "https://www.tokocrypto.com/open/v1/market/depth?symbol=BTC_IDR",
-                    "selector": "data.data.bids[0][0]",
+                    "name": "luno",
+                    "url": "https://api.luno.com/api/1/ticker?pair=XBTIDR",
+                    "selector": "data.last_trade",
                     "invert": false
                 },
                 {
