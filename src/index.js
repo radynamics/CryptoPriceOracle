@@ -71,7 +71,6 @@ app.post('/api/apikey', apiKeyController.authAdminPwr, (req, res) => { apiKeyCon
 app.get('/api/health', (req, res) => { healthController.get(req, res) })
 app.get('/api/status', apiKeyController.authAdminPwr, (req, res) => { statusController.get(req, res) })
 app.use('/api/', router)
-app.get('/', (req, res) => { res.send('Service up and running ☕') })
 
 async function doWork() {
     let result = []
