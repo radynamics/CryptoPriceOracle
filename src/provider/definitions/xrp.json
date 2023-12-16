@@ -319,12 +319,6 @@
                     "url": "https://api.independentreserve.com/Public/GetMarketSummary?primaryCurrencyCode=xrp&secondaryCurrencyCode=sgd",
                     "selector": "data.LastPrice",
                     "invert": false
-                },
-                {
-                    "name": "coingecko",
-                    "url": "https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=SGD&precision=10",
-                    "selector": "data.ripple.sgd",
-                    "invert": false
                 }
             ]
         },
