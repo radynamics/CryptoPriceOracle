@@ -65,12 +65,12 @@ const rateLimitMiddleware = setRateLimit({
 })
 
 const router = express.Router();
-app.get('/rate/:id', rateLimitMiddleware, apiKeyController.auth, (req, res) => { rateController.getRate(req, res) });
-app.get('/apikey', apiKeyController.authAdminPwr, (req, res) => { apiKeyController.list(req, res) });
-app.post('/apikey', apiKeyController.authAdminPwr, (req, res) => { apiKeyController.create(req, res) });
-app.get('/health', (req, res) => { healthController.get(req, res) })
-app.get('/status', apiKeyController.authAdminPwr, (req, res) => { statusController.get(req, res) })
-app.use('/', router)
+app.get('/api/rate/:id', rateLimitMiddleware, apiKeyController.auth, (req, res) => { rateController.getRate(req, res) });
+app.get('/api/apikey', apiKeyController.authAdminPwr, (req, res) => { apiKeyController.list(req, res) });
+app.post('/api/apikey', apiKeyController.authAdminPwr, (req, res) => { apiKeyController.create(req, res) });
+app.get('/api/health', (req, res) => { healthController.get(req, res) })
+app.get('/api/status', apiKeyController.authAdminPwr, (req, res) => { statusController.get(req, res) })
+app.use('/api/', router)
 app.get('/', (req, res) => { res.send('Service up and running ☕') })
 
 async function doWork() {
