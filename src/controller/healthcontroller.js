@@ -7,6 +7,15 @@ class HealthController {
     }
 
     async get(req, res) {
+        var stats = this.getStats()
+        if (stats.filter(e => !e.healthy).length > 0) {
+            res.status(500).send(stats)
+        } else {
+            res.status(200).send(null)
+        }
+    }
+
+    getStats() {
         var stats = []
         for (const publisher of this.publishers) {
             const lastPublished = publisher.getLastPublished()
@@ -14,12 +23,11 @@ class HealthController {
             const lastPublishedText = lastPublished == null ? null : lastPublished.toISOString()
             stats.push({ name: publisher.getName(), healthy: healthy, lastPublished: lastPublishedText })
         }
+        return stats
+    }
 
-        if (stats.filter(e => !e.healthy).length > 0) {
-            res.status(500).send(stats)
-        } else {
-            res.status(200).send(null)
-        }
+    allHealthy() {
+        return this.getStats().filter(e => !e.healthy).length === 0
     }
 }
 

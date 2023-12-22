@@ -27,6 +27,7 @@ Exchange rate sources are defined in ./provider/definitions with one json file p
 | TIMEOUT_SECONDS               | <15>                      | Timeout seconds for exchange rate source timeout                                   |
 | LOG_INFO                      | \<false>                   | True if infos should be printed to console                                            |
 | UNHEALTHY_AFTER               | <900000>                  | Millis without any new exchange rates until service returns   HTTP 500 at /health                                 |
+| UNHEALTHY_SHELL_COMMAND       |                           | Shell command to be executed if the service considers itself unhealthy             |
 | ADMINPWR                      |                           | Password for administrative calls                                                  |
 | APIKEYS                       |                           | Comma separated list of additional valid api keys                                  |
 | FETCH_CURRENCIES              | [XRP,XAH], <[]>           | Comma separated list of baseCurrencies to be fetched. [] or obmitted is considered all |

@@ -2,6 +2,7 @@
 const express = require('express')
 const setRateLimit = require('express-rate-limit')
 const bodyParser = require('body-parser')
+const { exec } = require('node:child_process')
 require('dotenv').config()
 
 const SourceDefinitions = require('./provider/sourcedefinitions')
@@ -21,6 +22,7 @@ app.use(bodyParser.json())
 
 const port = process.env.PORT || 3000
 const interval = process.env.PUBLISH_INTERVAL || 60000
+const unhealthyShellCommand = process.env.UNHEALTHY_SHELL_COMMAND === undefined || process.env.UNHEALTHY_SHELL_COMMAND.length === 0 ? undefined : process.env.UNHEALTHY_SHELL_COMMAND
 const adminPwr = process.env.ADMINPWR
 if (adminPwr == null) throw new Error('env.ADMINPWR must be defined')
 
@@ -90,6 +92,15 @@ async function doWork() {
         } catch (e) {
             console.error(e)
         }
+    }
+
+    if (!healthController.allHealthy() && unhealthyShellCommand !== undefined) {
+        console.error('Looks unhealthy, performing env.UNHEALTHY_SHELL_COMMAND.')
+        exec(unhealthyShellCommand, (err, output) => {
+            if (err) {
+                console.error("could not execute command: ", err)
+            }
+        })
     }
 }
 
