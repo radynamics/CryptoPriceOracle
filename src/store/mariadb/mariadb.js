@@ -59,8 +59,8 @@ class MariaDb {
                     "`exchangeId` INT NOT NULL," +
                     "`dt` DATETIME NOT NULL," +
                     "PRIMARY KEY (`rateId`)," +
-                    "INDEX `IX_BASE_QUOTE_DT` (`baseCcy` ASC, `quoteCcy` ASC, `dt` ASC) VISIBLE," +
-                    "INDEX `FK_exchangeId_idx` (`exchangeId` ASC) VISIBLE," +
+                    "INDEX `IX_BASE_QUOTE_DT` (`baseCcy` ASC, `quoteCcy` ASC, `dt` ASC)," +
+                    "INDEX `FK_exchangeId_idx` (`exchangeId` ASC)," +
                     "CONSTRAINT `FK_exchangeId` FOREIGN KEY (`exchangeId`) REFERENCES `exchange` (`exchangeId`) ON DELETE NO ACTION ON UPDATE NO ACTION);"
                 await conn.query(sql)
             }
