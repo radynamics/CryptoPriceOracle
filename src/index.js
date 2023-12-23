@@ -104,15 +104,18 @@ async function doWork() {
     }
 }
 
-app.listen(port, async () => {
-    console.log(`Started, listening on port ${port}`)
+async function startServer() {
     sourceDefinitions.load()
     if (!await store.initialized()) {
         await store.initialize()
     }
 
-    setInterval(function () {
+    app.listen(port, () => {
+        console.log(`Started, listening on port ${port}`)
+        setInterval(function () {
+            doWork()
+        }, interval)
         doWork()
-    }, interval)
-    doWork()
-})
+    })
+}
+startServer()
