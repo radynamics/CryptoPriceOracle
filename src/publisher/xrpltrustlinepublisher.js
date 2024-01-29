@@ -101,24 +101,18 @@ class XrplTrustlinePublisher {
                 return
             }
             const signed = accountWallet.sign(prepared)
-            client.submit(signed.tx_blob)
-                .then((result) => {
-                    // terQUEUED: "... did not meet the open ledger requirement, so the transaction has been queued for a future ledger."
-                    var successResult = ['tesSUCCESS', 'terQUEUED']
-                    if (!successResult.includes(result.result.engine_result)) {
-                        this.lastError = result.result.engine_result
-                        this.lastErrorOccured = new Date()
-                        console.warn(`Submitting ${tx.LimitAmount.currency} failed. ${result.result.engine_result}`)
-                        return
-                    }
-                    console.info(`Published ${tx.LimitAmount.currency} to XRPL (${this.endpoint})`)
-                    this.lastPublished = new Date()
-                    this.submissionsSinceStart++
-                })
-                .catch(e => {
-                    console.error(tx)
-                    this.logError(e)
-                })
+            const result = await client.submit(signed.tx_blob)
+            // terQUEUED: "... did not meet the open ledger requirement, so the transaction has been queued for a future ledger."
+            var successResult = ['tesSUCCESS', 'terQUEUED']
+            if (!successResult.includes(result.result.engine_result)) {
+                this.lastError = result.result.engine_result
+                this.lastErrorOccured = new Date()
+                console.warn(`Submitting ${tx.LimitAmount.currency} failed. ${result.result.engine_result}`)
+                return
+            }
+            console.info(`Published ${tx.LimitAmount.currency} to XRPL (${this.endpoint})`)
+            this.lastPublished = new Date()
+            this.submissionsSinceStart++
         } catch (e) {
             console.error(tx)
             this.logError(e)
