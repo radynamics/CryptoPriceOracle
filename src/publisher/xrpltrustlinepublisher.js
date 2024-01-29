@@ -60,7 +60,7 @@ class XrplTrustlinePublisher {
         const client = new xrpl.Client(this.endpoint)
         await client.connect()
         for (const tx of transactions) {
-            await this.publishToXrpl(client, tx)
+            await this.publishToXrpl(client, tx, 0)
         }
         await client.disconnect()
     }
@@ -90,7 +90,7 @@ class XrplTrustlinePublisher {
         }
     }
 
-    async publishToXrpl(client, tx) {
+    async publishToXrpl(client, tx, retryCounter) {
         try {
             const accountWallet = xrpl.Wallet.fromSeed(this.accountSecret)
             const prepared = await client.autofill(tx)
@@ -114,8 +114,20 @@ class XrplTrustlinePublisher {
             this.lastPublished = new Date()
             this.submissionsSinceStart++
         } catch (e) {
-            console.error(tx)
-            this.logError(e)
+            // DisconnectedError if server closed connection.
+            var disconnected = !client.isConnected()
+            if (disconnected) {
+                console.info(`Error, client disconnected. reconnecting...`)
+                await client.connect()
+            }
+            if (disconnected && retryCounter <= 1) {
+                console.info(tx)
+                console.info(e)
+                await this.publishToXrpl(client, tx, ++retryCounter)
+            } else {
+                console.error(tx)
+                this.logError(e)
+            }
         }
     }
 
