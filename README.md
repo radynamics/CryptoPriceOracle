@@ -6,7 +6,8 @@ If stored in memory or a database, this service offers a REST API to fetch persi
 Don't trust. Verify. Run your own instance to ensure you're getting the expected data.
 
 ### Wallets on-chain storage
-- [rpXCfDds782Bd6eK9Hsn15RDnGMtxf752m](https://bithomp.com/explorer/rpXCfDds782Bd6eK9Hsn15RDnGMtxf752m) (XRPL main)
+- [r3PDXzXky6gboMrwurmSCiUyhzdrFyAbfu](https://bithomp.com/explorer/r3PDXzXky6gboMrwurmSCiUyhzdrFyAbfu) (XRPL main)
+- <em>**2024-04-20 Deprecated** [rpXCfDds782Bd6eK9Hsn15RDnGMtxf752m](https://bithomp.com/explorer/rpXCfDds782Bd6eK9Hsn15RDnGMtxf752m) (XRPL main)</em>
 
 ## HTTP endpoints
 | url                 | description                                                                        | examples                          |
